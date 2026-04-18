@@ -27,7 +27,7 @@ export function SocialProofMessage({
       )}
     >
       <div
-        className="mb-3 grid snap-x snap-mandatory grid-flow-col auto-cols-[100%] gap-3 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mb-3 flex w-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: "touch" }}
         role="region"
         aria-roledescription="carousel"
@@ -36,16 +36,19 @@ export function SocialProofMessage({
         {SOCIAL_PROOF_IMAGE_PATHS.map((src, i) => (
           <div
             key={src}
-            className="relative aspect-square min-h-0 w-full snap-center snap-always overflow-hidden rounded-md border border-neutral-200/80 bg-neutral-100"
+            className="relative shrink-0 snap-center snap-always overflow-hidden rounded-md border border-neutral-200/80 bg-neutral-100"
+            style={{ flex: "0 0 100%", minWidth: "100%", width: "100%" }}
           >
-            <Image
-              src={src}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(max-width: 430px) 92vw, 360px"
-              priority={i === 0}
-            />
+            <div className="relative aspect-square w-full">
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(max-width: 430px) 88vw, 360px"
+                priority={i === 0}
+              />
+            </div>
           </div>
         ))}
       </div>
