@@ -110,6 +110,8 @@ export type AppStep =
   | "userInfo"
   | "bodyType"
   | "product"
+  /** 商品の戻る → アンケート誘導の中間画面 */
+  | "surveyPrompt"
   | "cartAdded"
   | "completed";
 

@@ -100,6 +100,8 @@ interface ExperimentContextValue {
   setUserInfoDraft: (u: UserInfo) => void;
   submitUserInfo: (u: UserInfo) => void;
   step: AppStep;
+  /** 戻る後の中間画面 → アンケート（userInfo）へ */
+  goToSurveyFromPrompt: () => void;
   goProductFromBodyType: () => void;
   conditionIndex: number;
   totalConditions: number;
@@ -233,6 +235,10 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setStep("bodyType");
   }, []);
 
+  const goToSurveyFromPrompt = useCallback(() => {
+    setStep("userInfo");
+  }, []);
+
   const goProductFromBodyType = useCallback(() => {
     const t = new Date().toISOString();
     patternStartedAtRef.current = t;
@@ -319,7 +325,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       }
 
       if (args.action === "back") {
-        setStep("userInfo");
+        setStep("surveyPrompt");
         return;
       }
 
@@ -377,6 +383,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setUserInfoDraft: setUserInfo,
     submitUserInfo,
     step,
+    goToSurveyFromPrompt,
     goProductFromBodyType,
     conditionIndex,
     totalConditions: CONDITION_ORDER.length,

@@ -14,6 +14,10 @@ const ja = {
   languageKo: "한국어",
   userInfoTitle: "基本情報",
   userInfoSubmit: "次へ",
+  surveyPromptTitle: "アンケートを答えてください",
+  surveyPromptBody:
+    "続けるには、基本情報のアンケートに回答してください。",
+  surveyPromptCta: "次の画面へ進む",
   ageLabel: "年齢層",
   genderLabel: "性別",
   regionLabel: "居住地域",
@@ -117,6 +121,10 @@ const ko = {
   languageKo: "한국어",
   userInfoTitle: "기본 정보",
   userInfoSubmit: "다음",
+  surveyPromptTitle: "설문에 응답해 주세요",
+  surveyPromptBody:
+    "계속하려면 기본 정보 설문에 응답해 주세요.",
+  surveyPromptCta: "다음 화면으로",
   ageLabel: "연령대",
   genderLabel: "성별",
   regionLabel: "거주 지역",
