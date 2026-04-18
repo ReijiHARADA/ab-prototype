@@ -8,7 +8,6 @@ import {
   ShoppingBag,
 } from "lucide-react";
 
-import { ColorSelector } from "@/components/ColorSelector";
 import { ProductHeroCarousel } from "@/components/ProductHeroCarousel";
 import { QuantitySelector } from "@/components/QuantitySelector";
 import { SectionAccordion } from "@/components/SectionAccordion";
@@ -42,17 +41,20 @@ export function ProductDetail() {
 
   const [size, setSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
-  const color = "PINK";
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     setIsFavorite(false);
   }, [conditionIndex]);
 
-  const selectionsRef = useRef({ size: "M" as string, quantity: 1, color: "PINK" });
+  const selectionsRef = useRef({
+    size: "M" as string,
+    quantity: 1,
+    color: "PINK",
+  });
   useEffect(() => {
-    selectionsRef.current = { size, quantity, color };
-  }, [size, quantity, color]);
+    selectionsRef.current = { size, quantity, color: "PINK" };
+  }, [size, quantity]);
 
   const finishedRef = useRef(false);
   const runFinish = useCallback((action: "timeout" | "back" | "add_to_cart") => {
@@ -122,8 +124,6 @@ export function ProductDetail() {
           <p className="text-xs text-emerald-800">{m.productInStock}</p>
         </div>
 
-        <ColorSelector value={color} label={m.color} grayLabel={m.colorPink} />
-
         <SizeSelector label={m.size} value={size} onChange={setSize} />
 
         <QuantitySelector
@@ -149,7 +149,7 @@ export function ProductDetail() {
           className={cn(
             "flex touch-manipulation items-center justify-center gap-2 rounded-md border py-3 text-sm transition-colors duration-200",
             isFavorite
-              ? "border-rose-300 bg-rose-50 text-rose-700"
+              ? "border-rose-300 bg-pink-50 text-rose-700"
               : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100"
           )}
           onClick={() => setIsFavorite((v) => !v)}
