@@ -164,13 +164,12 @@ export function ProductDetail() {
           {m.addToFavorites}
         </button>
 
-        <button
-          type="button"
-          className="w-full border-b border-neutral-200 py-3 text-left text-sm"
-          onClick={() => {}}
-        >
-          {m.storeStock}
-        </button>
+        <div className="w-full border-b border-neutral-200 py-3">
+          <p className="text-sm font-medium text-neutral-900">{m.storeStock}</p>
+          <p className="mt-2 text-xs leading-relaxed text-neutral-600">
+            {m.storeStockPlaceholder}
+          </p>
+        </div>
 
         <SectionAccordion items={accordionItems} />
       </div>

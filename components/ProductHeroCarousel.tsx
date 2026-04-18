@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { useMemo } from "react";
 
-import { PRODUCT_HERO_IMAGE_PATHS } from "@/lib/productHeroImages";
+import { useExperiment } from "@/context/experiment-context";
+import { getProductHeroImagePaths } from "@/lib/productHeroImages";
 import type { Language } from "@/types/experiment";
 import { getMessages } from "@/lib/i18n";
 
@@ -11,7 +13,13 @@ export function ProductHeroCarousel({
 }: {
   language?: Language;
 }) {
+  const { userInfo } = useExperiment();
   const m = getMessages(language);
+
+  const paths = useMemo(
+    () => getProductHeroImagePaths(userInfo?.gender),
+    [userInfo?.gender]
+  );
 
   return (
     <div
@@ -21,9 +29,9 @@ export function ProductHeroCarousel({
       aria-roledescription="carousel"
       aria-label={m.productHeroCarouselAria}
     >
-      {PRODUCT_HERO_IMAGE_PATHS.map((src, i) => (
+      {paths.map((src, i) => (
         <div
-          key={src}
+          key={`${src}-${i}`}
           className="relative shrink-0 snap-center snap-always bg-neutral-100"
           style={{ flex: "0 0 100%", minWidth: "100%", width: "100%" }}
         >

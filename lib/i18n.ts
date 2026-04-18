@@ -77,6 +77,8 @@ const ja = {
   addToCart: "カートに入れる",
   addToFavorites: "お気に入りに追加",
   storeStock: "店舗在庫状況",
+  storeStockPlaceholder:
+    "店舗を指定すると、その店舗の在庫の目安を表示できます。本プロトタイプでは実際の在庫照会は行っていません。",
   aboutProduct: "この商品について",
   details: "詳細",
   specs: "仕様",
@@ -188,6 +190,8 @@ const ko = {
   addToCart: "장바구니에 담기",
   addToFavorites: "찜하기",
   storeStock: "매장 재고",
+  storeStockPlaceholder:
+    "매장을 지정하면 해당 매장의 재고를 확인할 수 있습니다. 본 프로토타입에서는 실제 재고 조회를 하지 않습니다.",
   aboutProduct: "이 상품에 대해",
   details: "상세 정보",
   specs: "사양",
