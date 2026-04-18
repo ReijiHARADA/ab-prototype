@@ -110,7 +110,7 @@ export type AppStep =
   | "userInfo"
   | "bodyType"
   | "product"
-  /** 商品の戻る → アンケート誘導の中間画面 */
+  /** 商品の戻る → Googleフォーム案内の中間画面（CTA で次パターンへ） */
   | "surveyPrompt"
   | "cartAdded"
   | "completed";

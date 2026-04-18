@@ -100,8 +100,8 @@ interface ExperimentContextValue {
   setUserInfoDraft: (u: UserInfo) => void;
   submitUserInfo: (u: UserInfo) => void;
   step: AppStep;
-  /** 戻る後の中間画面 → アンケート（userInfo）へ */
-  goToSurveyFromPrompt: () => void;
+  /** 戻る後の中間画面 → 次パターンの商品（ソーシャルプルーフ）へ */
+  advanceFromSurveyPrompt: () => void;
   goProductFromBodyType: () => void;
   conditionIndex: number;
   totalConditions: number;
@@ -235,10 +235,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setStep("bodyType");
   }, []);
 
-  const goToSurveyFromPrompt = useCallback(() => {
-    setStep("userInfo");
-  }, []);
-
   const goProductFromBodyType = useCallback(() => {
     const t = new Date().toISOString();
     patternStartedAtRef.current = t;
@@ -281,6 +277,18 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     patternStartedAtRef.current = t;
     setPatternStartedAt(t);
   }, []);
+
+  const advanceFromSurveyPrompt = useCallback(() => {
+    const next = conditionIndex + 1;
+    if (next >= CONDITION_ORDER.length) {
+      setStep("completed");
+      clearPersisted();
+      return;
+    }
+    bumpPatternClock();
+    setConditionIndex(next);
+    setStep("product");
+  }, [conditionIndex, bumpPatternClock]);
 
   const completePattern = useCallback(
     async (args: {
@@ -383,7 +391,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setUserInfoDraft: setUserInfo,
     submitUserInfo,
     step,
-    goToSurveyFromPrompt,
+    advanceFromSurveyPrompt,
     goProductFromBodyType,
     conditionIndex,
     totalConditions: CONDITION_ORDER.length,

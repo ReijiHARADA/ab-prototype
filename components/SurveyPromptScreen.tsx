@@ -7,7 +7,7 @@ import { useExperiment } from "@/context/experiment-context";
 import { getMessages } from "@/lib/i18n";
 
 export function SurveyPromptScreen() {
-  const { language, goToSurveyFromPrompt } = useExperiment();
+  const { language, advanceFromSurveyPrompt } = useExperiment();
   const m = getMessages(language ?? "ja");
 
   return (
@@ -27,7 +27,7 @@ export function SurveyPromptScreen() {
       <Button
         type="button"
         className="h-12 w-full rounded-md text-base"
-        onClick={() => goToSurveyFromPrompt()}
+        onClick={() => advanceFromSurveyPrompt()}
       >
         {m.surveyPromptCta}
       </Button>
