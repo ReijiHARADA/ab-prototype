@@ -11,7 +11,6 @@ import {
 import { ProductHeroCarousel } from "@/components/ProductHeroCarousel";
 import { QuantitySelector } from "@/components/QuantitySelector";
 import { SectionAccordion } from "@/components/SectionAccordion";
-import { SizeSelector } from "@/components/SizeSelector";
 import { SocialProofMessage } from "@/components/SocialProofMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +38,6 @@ export function ProductDetail() {
   const lang = language ?? "ja";
   const m = getMessages(lang);
 
-  const [size, setSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -53,8 +51,8 @@ export function ProductDetail() {
     color: "PINK",
   });
   useEffect(() => {
-    selectionsRef.current = { size, quantity, color: "PINK" };
-  }, [size, quantity]);
+    selectionsRef.current = { size: "M", quantity, color: "PINK" };
+  }, [quantity]);
 
   const finishedRef = useRef(false);
   const runFinish = useCallback((action: "timeout" | "back" | "add_to_cart") => {
@@ -106,25 +104,24 @@ export function ProductDetail() {
         >
           <ArrowLeft className="size-5" />
         </button>
-        <button type="button" className="rounded p-2 opacity-40" aria-hidden>
-          <Search className="size-5" />
-        </button>
-        <button type="button" className="rounded p-2 opacity-40" aria-hidden>
-          <ShoppingBag className="size-5" />
-        </button>
+        <div className="flex items-center">
+          <button type="button" className="rounded p-2 opacity-40" aria-hidden>
+            <Search className="size-5" />
+          </button>
+          <button type="button" className="rounded p-2 opacity-40" aria-hidden>
+            <ShoppingBag className="size-5" />
+          </button>
+        </div>
       </header>
 
       <ProductHeroCarousel language={lang} />
 
       <div className="flex flex-col gap-6 px-4 pt-6">
         <div className="space-y-2">
-          <p className="text-xs font-medium text-amber-800">{m.productBadge}</p>
           <h1 className="text-lg font-medium leading-snug">{m.productName}</h1>
           <p className="text-base font-medium tabular-nums">{m.productPrice}</p>
           <p className="text-xs text-emerald-800">{m.productInStock}</p>
         </div>
-
-        <SizeSelector label={m.size} value={size} onChange={setSize} />
 
         <QuantitySelector
           label={m.quantity}
@@ -152,7 +149,7 @@ export function ProductDetail() {
           className={cn(
             "flex touch-manipulation items-center justify-center gap-2 rounded-md border py-3 text-sm transition-colors duration-200",
             isFavorite
-              ? "border-rose-300 bg-pink-50 text-rose-700"
+              ? "border-rose-300 bg-white text-rose-700"
               : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100"
           )}
           onClick={() => setIsFavorite((v) => !v)}
