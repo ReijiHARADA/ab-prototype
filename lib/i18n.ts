@@ -19,6 +19,8 @@ const ja = {
     "続けるには、Google formのアンケートに回答してください。",
   surveyPromptCta: "次の画面へ",
   productHeroCarouselAria: "商品画像（横にスワイプ）",
+  productCarouselDotAria: (n: number, total: number) =>
+    `画像 ${n} / ${total}`,
   ageLabel: "年齢層",
   genderLabel: "性別",
   regionLabel: "居住地域",
@@ -132,6 +134,8 @@ const ko = {
     "계속하려면 Google Form 설문에 응답해 주세요.",
   surveyPromptCta: "다음 화면으로",
   productHeroCarouselAria: "상품 이미지(가로로 스와이프)",
+  productCarouselDotAria: (n: number, total: number) =>
+    `이미지 ${n} / ${total}`,
   ageLabel: "연령대",
   genderLabel: "성별",
   regionLabel: "거주 지역",
