@@ -56,11 +56,11 @@ export function ProductDetail() {
   }, [size, quantity, color]);
 
   const finishedRef = useRef(false);
-  const runFinish = useCallback(async (action: "timeout" | "back" | "add_to_cart") => {
+  const runFinish = useCallback((action: "timeout" | "back" | "add_to_cart") => {
     if (finishedRef.current) return;
     finishedRef.current = true;
     const { size: sz, quantity: q, color: c } = selectionsRef.current;
-    await completePatternRef.current({
+    completePatternRef.current({
       action:
         action === "add_to_cart"
           ? "add_to_cart"
@@ -126,7 +126,7 @@ export function ProductDetail() {
           type="button"
           className="rounded p-2"
           aria-label="back"
-          onClick={() => void runFinish("back")}
+          onClick={() => runFinish("back")}
         >
           <ArrowLeft className="size-5" />
         </button>
@@ -181,7 +181,7 @@ export function ProductDetail() {
           <Button
             type="button"
             className="h-12 w-full rounded-md text-base"
-            onClick={() => void runFinish("add_to_cart")}
+            onClick={() => runFinish("add_to_cart")}
           >
             {m.addToCart}
           </Button>

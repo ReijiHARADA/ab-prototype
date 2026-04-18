@@ -118,7 +118,7 @@ interface ExperimentContextValue {
     selectedSize: string;
     selectedColor: string;
     quantity: number;
-  }) => Promise<void>;
+  }) => void;
   resetExperiment: () => void;
 }
 
@@ -278,7 +278,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   }, [conditionIndex, bumpPatternClock]);
 
   const completePattern = useCallback(
-    async (args: {
+    (args: {
       action: PatternAction;
       actionDetail?: string;
       selectedSize: string;
@@ -310,16 +310,17 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         selectedColor: args.selectedColor,
         quantity: args.quantity,
       };
-      await logPatternResult(log);
       setSessionPatternLogs((prev) => [...prev, log]);
 
       if (args.action === "add_to_cart") {
         setStep("surveyPrompt");
+        void logPatternResult(log);
         return;
       }
 
       if (args.action === "back") {
         setStep("surveyPrompt");
+        void logPatternResult(log);
         return;
       }
 
@@ -327,10 +328,12 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       if (next >= CONDITION_ORDER.length) {
         setStep("completed");
         clearPersisted();
+        void logPatternResult(log);
         return;
       }
       bumpPatternClock();
       setConditionIndex(next);
+      void logPatternResult(log);
     },
     [
       language,
