@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -10,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { ColorSelector } from "@/components/ColorSelector";
+import { ProductHeroCarousel } from "@/components/ProductHeroCarousel";
 import { QuantitySelector } from "@/components/QuantitySelector";
 import { SectionAccordion } from "@/components/SectionAccordion";
 import { SizeSelector } from "@/components/SizeSelector";
@@ -42,15 +42,14 @@ export function ProductDetail() {
 
   const [size, setSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
-  const color = "GRAY";
-  const [imgError, setImgError] = useState(false);
+  const color = "PINK";
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     setIsFavorite(false);
   }, [conditionIndex]);
 
-  const selectionsRef = useRef({ size: "M" as string, quantity: 1, color });
+  const selectionsRef = useRef({ size: "M" as string, quantity: 1, color: "PINK" });
   useEffect(() => {
     selectionsRef.current = { size, quantity, color };
   }, [size, quantity, color]);
@@ -88,35 +87,10 @@ export function ProductDetail() {
   const showProof = currentConditionId !== "none";
 
   const accordionItems = [
-    {
-      id: "about",
-      title: m.aboutProduct,
-      content: m.productDesc,
-    },
-    {
-      id: "detail",
-      title: m.details,
-      content:
-        lang === "ja"
-          ? "着丈・身幅などの採寸情報は参考値です。"
-          : "기장·가슴둘레 등 치수 정보는 참고용입니다.",
-    },
-    {
-      id: "spec",
-      title: m.specs,
-      content:
-        lang === "ja"
-          ? "綿60％／ポリエステル40％"
-          : "면 60% / 폴리에스터 40%",
-    },
-    {
-      id: "care",
-      title: m.materialCare,
-      content:
-        lang === "ja"
-          ? "洗濯機洗い可。漂白不可。乾燥機は低温で。"
-          : "세탁기 사용 가능. 표백 금지. 건조기는 저온.",
-    },
+    { id: "about", title: m.aboutProduct, content: m.productDesc },
+    { id: "detail", title: m.details, content: m.productDetailBody },
+    { id: "spec", title: m.specs, content: m.productSpecsBody },
+    { id: "care", title: m.materialCare, content: m.productMaterialCareBody },
   ];
 
   return (
@@ -138,32 +112,17 @@ export function ProductDetail() {
         </button>
       </header>
 
-      <div className="relative aspect-[3/4] w-full bg-neutral-200">
-        {!imgError ? (
-          <Image
-            src="/product-main.jpg"
-            alt={m.productName}
-            fill
-            className="object-cover"
-            sizes="430px"
-            priority
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">
-            Image
-          </div>
-        )}
-      </div>
+      <ProductHeroCarousel language={lang} />
 
       <div className="flex flex-col gap-6 px-4 pt-6">
         <div className="space-y-2">
+          <p className="text-xs font-medium text-amber-800">{m.productBadge}</p>
           <h1 className="text-lg font-medium leading-snug">{m.productName}</h1>
           <p className="text-base font-medium tabular-nums">{m.productPrice}</p>
           <p className="text-xs text-emerald-800">{m.productInStock}</p>
         </div>
 
-        <ColorSelector value={color} label={m.color} grayLabel={m.colorGray} />
+        <ColorSelector value={color} label={m.color} grayLabel={m.colorPink} />
 
         <SizeSelector label={m.size} value={size} onChange={setSize} />
 
@@ -174,11 +133,7 @@ export function ProductDetail() {
         />
 
         <div className="space-y-3 pt-2">
-          <SocialProofMessage
-            text={socialProofText}
-            visible={showProof}
-            language={lang}
-          />
+          <SocialProofMessage text={socialProofText} visible={showProof} />
           <Button
             type="button"
             className="h-12 w-full rounded-md text-base"

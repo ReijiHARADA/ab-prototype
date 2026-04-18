@@ -18,7 +18,7 @@ const ja = {
   surveyPromptBody:
     "続けるには、Google formのアンケートに回答してください。",
   surveyPromptCta: "次の画面へ",
-  socialProofCarouselAria: "ソーシャルプルーフ画像（横にスワイプ）",
+  productHeroCarouselAria: "商品画像（横にスワイプ）",
   ageLabel: "年齢層",
   genderLabel: "性別",
   regionLabel: "居住地域",
@@ -104,10 +104,18 @@ const ja = {
   summaryCart: "カート追加されたパターン",
   summaryBack: "戻るが押されたパターン",
   summaryTimeout: "タイムアウトしたパターン",
-  productName: "ワッフルヘンリーネックTシャツ / 長袖",
+  /** ユニクロ商品ページに準拠: https://www.uniqlo.com/jp/ja/products/E465185-000/01 */
+  productName: "エアリズムコットンオーバーサイズTシャツ/5分袖",
+  productBadge: "ベストセラー",
   productDesc:
-    "洗い加工で、ふっくらやわらかな風合いのワッフル素材。リブの袖口は、腕まくりをしても落ちにくい。一枚でもインナーとしても使いやすい、ベーシックな長袖Tシャツ。",
-  colorGray: "GRAY",
+    "見た目コットンの「エアリズム」。汗をかいてもサラッとした肌ざわり。着た瞬間にひんやりとして、涼しい着心地。5分袖、オーバーサイズ、ドロップショルダーでリラックス感のある着心地。やや詰まったクルーネックでクリーンに着こなせる。",
+  productDetailBody:
+    "商品番号: 475355。掲載画像には販売予定にないカラーが含まれている場合があります。着丈・身幅などの採寸情報は参考値です。",
+  productSpecsBody:
+    "きれいなシルエットに仕上がる素材。XS・XXL・3XL・4XLサイズは、オンラインストアのみでの取り扱いとなります。",
+  productMaterialCareBody:
+    "【素材】53% 綿、30% ポリエステル、17% 複合繊維（ポリエステル）（30% リサイクルポリエステル繊維を使用）\n\n【取扱い】洗濯機可、ドライクリーニング可、乾燥機不可。濃色は色落ちする事がありますので、他の物とのお洗濯はお避け下さい。汗や雨等で湿った状態、または摩擦によって、他の物に色移りする事がありますので、ご注意下さい。",
+  colorPink: "12 PINK",
 } as const;
 
 const ko = {
@@ -121,7 +129,7 @@ const ko = {
   surveyPromptBody:
     "계속하려면 Google Form 설문에 응답해 주세요.",
   surveyPromptCta: "다음 화면으로",
-  socialProofCarouselAria: "소셜 프루프 이미지(가로로 스와이프)",
+  productHeroCarouselAria: "상품 이미지(가로로 스와이프)",
   ageLabel: "연령대",
   genderLabel: "성별",
   regionLabel: "거주 지역",
@@ -207,10 +215,18 @@ const ko = {
   summaryCart: "장바구니에 담긴 패턴",
   summaryBack: "뒤로가기가 눌린 패턴",
   summaryTimeout: "타임아웃한 패턴",
-  productName: "와플 헨리넥 티셔츠 / 긴팔",
+  /** 유니클로 상품 페이지 기준 (일본어판과 동등 내용) */
+  productName: "에어리즘 코튼 오버사이즈 티셔츠/5부 소매",
+  productBadge: "베스트셀러",
   productDesc:
-    "워싱 가공으로 부드럽고 포근한 와플 소재를 사용했습니다. 립 소매는 팔을 걷어도 쉽게 흘러내리지 않습니다. 단독으로도, 이너로도 활용하기 좋은 베이직 긴팔 티셔츠입니다.",
-  colorGray: "GRAY",
+    "겉보기엔 코튼인 「에어리즘」. 땀을 흘려도 산뜻한 촉감. 입는 순간 시원하고, 시원한 착용감. 5부 소매, 오버사이즈, 드롭숄더로 편안한 실루엣. 조금 모인 크루넥으로 깔끔하게 연출할 수 있습니다.",
+  productDetailBody:
+    "상품 번호: 475355. 게재 이미지에 판매 예정이 아닌 컬러가 포함될 수 있습니다. 기장·가슴둘레 등 치수 정보는 참고용입니다.",
+  productSpecsBody:
+    "깔끔한 실루엣을 내는 소재. XS·XXL·3XL·4XL 사이즈는 온라인 스토어에서만 취급합니다.",
+  productMaterialCareBody:
+    "【소재】면 53%, 폴리에스터 30%, 복합 섬유(폴리에스터) 17% (리사이클 폴리에스터 섬유 30% 사용)\n\n【취급】세탁기 사용 가능, 드라이클리닝 가능, 건조기 사용 불가. 짙은 색은 이염할 수 있으므로 다른 옷과 함께 세탁하지 마세요. 땀이나 비 등으로 젖었을 때, 또는 마찰로 다른 물건에 이염될 수 있으니 주의하세요.",
+  colorPink: "12 PINK",
 } as const;
 
 export type Messages = typeof ja | typeof ko;

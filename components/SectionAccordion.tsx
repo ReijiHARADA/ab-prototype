@@ -19,7 +19,7 @@ export function SectionAccordion({
           <AccordionTrigger className="text-sm font-medium hover:no-underline">
             {item.title}
           </AccordionTrigger>
-          <AccordionContent className="pb-4 text-sm leading-relaxed text-neutral-700">
+          <AccordionContent className="whitespace-pre-line pb-4 text-sm leading-relaxed text-neutral-700">
             {item.content}
           </AccordionContent>
         </AccordionItem>
