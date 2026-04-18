@@ -20,6 +20,8 @@ import {
   useExperiment,
 } from "@/context/experiment-context";
 import { getMessages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
 export function ProductDetail() {
   const {
     language,
@@ -42,6 +44,11 @@ export function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const color = "GRAY";
   const [imgError, setImgError] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    setIsFavorite(false);
+  }, [conditionIndex]);
 
   const selectionsRef = useRef({ size: "M" as string, quantity: 1, color });
   useEffect(() => {
@@ -182,10 +189,22 @@ export function ProductDetail() {
 
         <button
           type="button"
-          className="flex items-center justify-center gap-2 border border-neutral-200 py-3 text-sm"
-          onClick={() => {}}
+          aria-pressed={isFavorite}
+          className={cn(
+            "flex touch-manipulation items-center justify-center gap-2 rounded-md border py-3 text-sm transition-colors duration-200",
+            isFavorite
+              ? "border-rose-300 bg-rose-50 text-rose-700"
+              : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100"
+          )}
+          onClick={() => setIsFavorite((v) => !v)}
         >
-          <Heart className="size-4" />
+          <Heart
+            className={cn(
+              "size-4 shrink-0 transition-colors duration-200",
+              isFavorite ? "fill-rose-500 text-rose-500" : "text-neutral-600"
+            )}
+            fill={isFavorite ? "currentColor" : "none"}
+          />
           {m.addToFavorites}
         </button>
 
