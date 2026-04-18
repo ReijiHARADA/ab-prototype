@@ -318,6 +318,11 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      if (args.action === "back") {
+        setStep("userInfo");
+        return;
+      }
+
       const next = conditionIndex + 1;
       if (next >= CONDITION_ORDER.length) {
         setStep("completed");
