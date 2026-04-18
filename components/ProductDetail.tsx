@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 export function ProductDetail() {
   const {
     language,
-    socialProofText,
+    socialProofSegments,
     currentConditionId,
     completePattern,
     patternStartedAt,
@@ -133,7 +133,10 @@ export function ProductDetail() {
         />
 
         <div className="space-y-3 pt-2">
-          <SocialProofMessage text={socialProofText} visible={showProof} />
+          <SocialProofMessage
+            segments={socialProofSegments}
+            visible={showProof}
+          />
           <Button
             type="button"
             className="h-12 w-full rounded-md text-base"

@@ -14,7 +14,11 @@ import {
 import { CONDITION_ORDER, getConditionIdAtIndex } from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
 import { logPatternResult } from "@/lib/logger";
-import { getSocialProofText } from "@/lib/socialProofText";
+import {
+  getSocialProofSegments,
+  getSocialProofText,
+} from "@/lib/socialProofText";
+import type { SocialProofSegment } from "@/lib/socialProofText";
 import type {
   AppStep,
   ConditionId,
@@ -105,6 +109,7 @@ interface ExperimentContextValue {
   totalConditions: number;
   currentConditionId: ConditionId;
   socialProofText: string;
+  socialProofSegments: SocialProofSegment[];
   viewerCountForPattern: number;
   useHeightForBodyType: boolean;
   sessionId: string;
@@ -242,22 +247,35 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     [sessionId, conditionIndex]
   );
 
-  const socialProofText = useMemo(() => {
-    if (!language || !userInfo) return "";
-    return getSocialProofText({
+  const socialProofCtx = useMemo(
+    () =>
+      language && userInfo
+        ? {
+            language,
+            user: userInfo,
+            conditionId: currentConditionId,
+            viewerCount: viewerCountForPattern,
+            useHeightForBodyType,
+          }
+        : null,
+    [
       language,
-      user: userInfo,
-      conditionId: currentConditionId,
-      viewerCount: viewerCountForPattern,
+      userInfo,
+      currentConditionId,
+      viewerCountForPattern,
       useHeightForBodyType,
-    });
-  }, [
-    language,
-    userInfo,
-    currentConditionId,
-    viewerCountForPattern,
-    useHeightForBodyType,
-  ]);
+    ]
+  );
+
+  const socialProofSegments = useMemo(
+    () => (socialProofCtx ? getSocialProofSegments(socialProofCtx) : []),
+    [socialProofCtx]
+  );
+
+  const socialProofText = useMemo(
+    () => (socialProofCtx ? getSocialProofText(socialProofCtx) : ""),
+    [socialProofCtx]
+  );
 
   const bumpPatternClock = useCallback(() => {
     const t = new Date().toISOString();
@@ -372,6 +390,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     totalConditions: CONDITION_ORDER.length,
     currentConditionId,
     socialProofText,
+    socialProofSegments,
     viewerCountForPattern,
     useHeightForBodyType,
     sessionId,

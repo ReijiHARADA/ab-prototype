@@ -15,6 +15,8 @@ export interface SocialProofContext {
   useHeightForBodyType: boolean;
 }
 
+export type SocialProofSegment = { bold?: boolean; text: string };
+
 function labelForUser(
   m: Messages,
   u: UserInfo
@@ -38,50 +40,106 @@ function labelForUser(
   };
 }
 
-export function getSocialProofText(ctx: SocialProofContext): string {
+/** 画面上はセグメント単位で太字を付与。ログ用は {@link getSocialProofText} で結合。句点「。」は付けない。 */
+export function getSocialProofSegments(
+  ctx: SocialProofContext
+): SocialProofSegment[] {
   const { conditionId, language, user, viewerCount, useHeightForBodyType } =
     ctx;
-  const m = getMessages(language);
   const sold = SOLD_COUNT_BY_CONDITION[conditionId];
+  const m = getMessages(language);
   const L = labelForUser(m, user);
 
   switch (conditionId) {
     case "sales_volume":
       return language === "ja"
-        ? `過去1ヶ月で${sold}点以上販売された商品です。`
-        : `최근 1개월 동안 ${sold}개 이상 판매된 상품입니다.`;
+        ? [
+            { bold: true, text: `過去1ヶ月で${sold}点以上販売された` },
+            { text: `商品です` },
+          ]
+        : [
+            { bold: true, text: `최근 1개월 동안 ${sold}개 이상 판매된` },
+            { text: ` 상품입니다` },
+          ];
     case "age_based":
       return language === "ja"
-        ? `${L.ageGroup}の方に人気のある商品です。`
-        : `${L.ageGroup}에게 인기 있는 상품입니다.`;
+        ? [
+            { bold: true, text: `${L.ageGroup}の方` },
+            { text: `に人気のある商品です` },
+          ]
+        : [
+            { bold: true, text: `${L.ageGroup}` },
+            { text: `에게 인기 있는 상품입니다` },
+          ];
     case "gender_based":
       return language === "ja"
-        ? `${L.gender}の方によく購入されている商品です。`
-        : `${L.gender}에게 자주 구매되는 상품입니다.`;
+        ? [
+            { bold: true, text: `${L.gender}の方` },
+            { text: `によく購入されている商品です` },
+          ]
+        : [
+            { bold: true, text: `${L.gender}` },
+            { text: `에게 자주 구매되는 상품입니다` },
+          ];
     case "region_based":
       return language === "ja"
-        ? `${L.region}に住む方に人気のある商品です。`
-        : `${L.region}에 거주하는 분들에게 인기 있는 상품입니다.`;
+        ? [
+            { bold: true, text: `${L.region}に住む方` },
+            { text: `に人気のある商品です` },
+          ]
+        : [
+            { bold: true, text: `${L.region}에 거주하는 분들` },
+            { text: `에게 인기 있는 상품입니다` },
+          ];
     case "design_preference":
       return language === "ja"
-        ? `${L.designPick}が好きな方に人気のある商品です。`
-        : `${L.designPick} 스타일을 선호하는 분들에게 인기 있는 상품입니다.`;
+        ? [
+            { bold: true, text: `${L.designPick}が好きな方` },
+            { text: `に人気のある商品です` },
+          ]
+        : [
+            { bold: true, text: `${L.designPick} 스타일을 선호하는 분들` },
+            { text: `에게 인기 있는 상품입니다` },
+          ];
     case "body_type":
       if (useHeightForBodyType) {
         return language === "ja"
-          ? `${user.heightCm}cm前後の方によく選ばれている商品です。`
-          : `${user.heightCm}cm 전후의 분들이 자주 선택하는 상품입니다.`;
+          ? [
+              { bold: true, text: `${user.heightCm}cm前後の方` },
+              { text: `によく選ばれている商品です` },
+            ]
+          : [
+              { bold: true, text: `${user.heightCm}cm 전후의 분들` },
+              { text: `이 자주 선택하는 상품입니다` },
+            ];
       }
       return language === "ja"
-        ? `${L.bodyTypeLabel}体型の方によく購入されている商品です。`
-        : `${L.bodyTypeLabel} 체형의 분들이 자주 구매하는 상품입니다.`;
+        ? [
+            { bold: true, text: `${L.bodyTypeLabel}体型の方` },
+            { text: `によく購入されている商品です` },
+          ]
+        : [
+            { bold: true, text: `${L.bodyTypeLabel} 체형의 분들` },
+            { text: `이 자주 구매하는 상품입니다` },
+          ];
     case "realtime_behavior":
       return language === "ja"
-        ? `現在${viewerCount}名がこの商品を見ています。`
-        : `현재 ${viewerCount}명이 이 상품을 보고 있습니다.`;
+        ? [
+            { bold: true, text: `現在${viewerCount}名` },
+            { text: `がこの商品を見ています` },
+          ]
+        : [
+            { bold: true, text: `현재 ${viewerCount}명` },
+            { text: `이 이 상품을 보고 있습니다` },
+          ];
     case "none":
-      return "";
+      return [];
     default:
-      return "";
+      return [];
   }
+}
+
+/** CSV・ログ用のプレーンテキスト（太字情報なし・句点なし） */
+export function getSocialProofText(ctx: SocialProofContext): string {
+  return getSocialProofSegments(ctx).map((s) => s.text).join("");
 }
