@@ -17,7 +17,6 @@ import { logPatternResult } from "@/lib/logger";
 import { getSocialProofText } from "@/lib/socialProofText";
 import type {
   AppStep,
-  CartAddedView,
   ConditionId,
   Language,
   PatternAction,
@@ -35,7 +34,6 @@ interface PersistedV1 {
   step: AppStep;
   conditionIndex: number;
   experimentStartedAt: string;
-  cartAddedView: CartAddedView;
   /** 商品画面の開始（タイマー再開用） */
   patternStartedAt: string;
 }
@@ -113,8 +111,6 @@ interface ExperimentContextValue {
   experimentStartedAt: string | null;
   patternStartedAt: string | null;
   sessionPatternLogs: PatternLog[];
-  cartAddedView: CartAddedView;
-  setCartAddedView: (v: CartAddedView) => void;
   /** パターン離脱（timeout/back/add_to_cart のうちログに残す直前まで） */
   completePattern: (args: {
     action: PatternAction;
@@ -123,8 +119,6 @@ interface ExperimentContextValue {
     selectedColor: string;
     quantity: number;
   }) => Promise<void>;
-  /** カート画面から次のパターン */
-  advanceAfterCart: () => void;
   resetExperiment: () => void;
 }
 
@@ -148,9 +142,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   const [sessionPatternLogs, setSessionPatternLogs] = useState<PatternLog[]>(
     []
   );
-  const [cartAddedView, setCartAddedView] =
-    useState<CartAddedView>("summary");
-
   const hydratedRef = useRef(false);
 
   /* localStorage から実験の再開用に復元（クライアント専用） */
@@ -174,7 +165,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       patternStartedAtRef.current = p.patternStartedAt;
       setPatternStartedAt(p.patternStartedAt);
     }
-    if (p.cartAddedView) setCartAddedView(p.cartAddedView);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
@@ -189,7 +179,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         step,
         conditionIndex,
         experimentStartedAt,
-        cartAddedView,
         patternStartedAt: patternStartedAt ?? new Date().toISOString(),
         ...overrides,
       };
@@ -202,7 +191,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       sessionId,
       step,
       conditionIndex,
-      cartAddedView,
       patternStartedAt,
     ]
   );
@@ -217,7 +205,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     conditionIndex,
     sessionId,
     experimentStartedAt,
-    cartAddedView,
     patternStartedAt,
     persist,
   ]);
@@ -327,8 +314,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       setSessionPatternLogs((prev) => [...prev, log]);
 
       if (args.action === "add_to_cart") {
-        setCartAddedView("summary");
-        setStep("cartAdded");
+        setStep("surveyPrompt");
         return;
       }
 
@@ -358,19 +344,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     ]
   );
 
-  const advanceAfterCart = useCallback(() => {
-    const next = conditionIndex + 1;
-    if (next >= CONDITION_ORDER.length) {
-      setStep("completed");
-      clearPersisted();
-      return;
-    }
-    bumpPatternClock();
-    setConditionIndex(next);
-    setStep("product");
-    setCartAddedView("summary");
-  }, [conditionIndex, bumpPatternClock]);
-
   const resetExperiment = useCallback(() => {
     clearPersisted();
     setLanguageState(null);
@@ -381,7 +354,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setExperimentStartedAt(null);
     setPatternStartedAt(null);
     setSessionPatternLogs([]);
-    setCartAddedView("summary");
   }, []);
 
   const value: ExperimentContextValue = {
@@ -403,10 +375,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     experimentStartedAt,
     patternStartedAt,
     sessionPatternLogs,
-    cartAddedView,
-    setCartAddedView,
     completePattern,
-    advanceAfterCart,
     resetExperiment,
   };
 

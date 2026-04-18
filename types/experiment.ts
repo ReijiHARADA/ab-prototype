@@ -110,9 +110,6 @@ export type AppStep =
   | "userInfo"
   | "bodyType"
   | "product"
-  /** 商品の戻る → Googleフォーム案内の中間画面（CTA で次パターンへ） */
+  /** 戻る／カート追加後 → Googleフォーム案内（CTA で次パターンへ） */
   | "surveyPrompt"
-  | "cartAdded"
   | "completed";
-
-export type CartAddedView = "summary" | "cartStub";

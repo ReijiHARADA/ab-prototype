@@ -1,7 +1,6 @@
 "use client";
 
 import { BodyTypeResult } from "@/components/BodyTypeResult";
-import { CartAddedScreen } from "@/components/CartAddedScreen";
 import { LanguageSelect } from "@/components/LanguageSelect";
 import { PhoneShell } from "@/components/PhoneShell";
 import { ProductDetail } from "@/components/ProductDetail";
@@ -22,7 +21,6 @@ export function ExperimentFlow() {
       {step === "bodyType" && language && <BodyTypeResult />}
       {step === "surveyPrompt" && language && <SurveyPromptScreen />}
       {step === "product" && language && <ProductDetail />}
-      {step === "cartAdded" && language && <CartAddedScreen />}
       {step === "completed" && language && <ResultDashboard />}
     </PhoneShell>
   );
