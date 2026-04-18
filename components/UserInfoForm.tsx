@@ -3,15 +3,11 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useExperiment } from "@/context/experiment-context";
 import { calculateBmi, getBodyTypeFromBmi } from "@/lib/bodyType";
-import {
-  DESIGN_TAG_LIST,
-  getMessages,
-  getRegionOptions,
-} from "@/lib/i18n";
+import { DESIGN_TAG_LIST, getMessages, getRegionOptions } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import type {
   AgeGroup,
   DesignTag,
@@ -24,7 +20,6 @@ import type {
 const AGES: AgeGroup[] = ["10s", "20s", "30s", "40s", "50plus"];
 const GENDERS: Gender[] = ["male", "female", "other"];
 
-/** 140〜200cm、5cm 刻み（保存値はその代表 cm） */
 function heights(): number[] {
   const out: number[] = [];
   for (let h = 140; h <= 200; h += 5) out.push(h);
@@ -41,10 +36,14 @@ function weights(): number[] {
   return out;
 }
 
+type WizardStep = 1 | 2 | 3;
+
 export function UserInfoForm() {
   const { language, submitUserInfo } = useExperiment();
   const lang: Language = language ?? "ja";
   const m = getMessages(lang);
+
+  const [step, setStep] = useState<WizardStep>(1);
 
   const [ageGroup, setAgeGroup] = useState<AgeGroup>("20s");
   const [gender, setGender] = useState<Gender>("male");
@@ -57,9 +56,13 @@ export function UserInfoForm() {
   const [weightKg, setWeightKg] = useState(65);
 
   const toggleTag = (t: DesignTag) => {
-    setDesignTags((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-    );
+    setDesignTags((prev) => {
+      if (prev.includes(t)) {
+        if (prev.length <= 1) return prev;
+        return prev.filter((x) => x !== t);
+      }
+      return [...prev, t];
+    });
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -80,131 +83,225 @@ export function UserInfoForm() {
     submitUserInfo(payload);
   };
 
+  const selectClass =
+    "w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base shadow-sm outline-none transition-colors focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200";
+
   return (
-    <form
-      onSubmit={onSubmit}
-      className="flex min-h-dvh flex-col"
-    >
-      <div className="flex flex-1 flex-col gap-8 px-5 py-8 text-sm leading-relaxed">
-      <h1 className="text-lg font-medium">{m.userInfoTitle}</h1>
+    <form onSubmit={onSubmit} className="flex min-h-dvh flex-col">
+      <div className="flex flex-1 flex-col px-5 pb-4 pt-6">
+        {step === 1 && (
+          <>
+            <header className="mb-8">
+              <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+                {m.userInfoTitle}
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                {m.userInfoIntroShort}
+              </p>
+            </header>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 font-medium">{m.ageLabel}</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {AGES.map((a) => (
-            <label
-              key={a}
-              className="flex cursor-pointer items-center gap-2 border border-neutral-200 px-3 py-2"
-            >
-              <input
-                type="radio"
-                name="age"
-                className="accent-neutral-900"
-                checked={ageGroup === a}
-                onChange={() => setAgeGroup(a)}
-              />
-              <span>{m.ages[a]}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+            <div className="flex flex-col gap-8">
+              <section>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+                  {m.ageLabel}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {AGES.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAgeGroup(a)}
+                      className={cn(
+                        "rounded-full border px-4 py-3 text-sm font-medium transition-colors",
+                        ageGroup === a
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400"
+                      )}
+                    >
+                      {m.ages[a]}
+                    </button>
+                  ))}
+                </div>
+              </section>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 font-medium">{m.genderLabel}</legend>
-        <div className="flex flex-col gap-2">
-          {GENDERS.map((g) => (
-            <label
-              key={g}
-              className="flex cursor-pointer items-center gap-2 border border-neutral-200 px-3 py-2"
-            >
-              <input
-                type="radio"
-                name="gender"
-                className="accent-neutral-900"
-                checked={gender === g}
-                onChange={() => setGender(g)}
-              />
-              <span>{m.genders[g]}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+              <section>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+                  {m.genderLabel}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {GENDERS.map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGender(g)}
+                      className={cn(
+                        "w-full rounded-full border px-4 py-3.5 text-left text-sm font-medium transition-colors",
+                        gender === g
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400"
+                      )}
+                    >
+                      {m.genders[g]}
+                    </button>
+                  ))}
+                </div>
+              </section>
 
-      <div className="space-y-2">
-        <Label className="text-base font-medium">{m.regionLabel}</Label>
-        <select
-          className="w-full border border-neutral-200 bg-white px-3 py-3 text-base outline-none"
-          value={region}
-          onChange={(e) => setRegion(e.target.value as Region)}
-        >
-          {regionOptions.map((r) => (
-            <option key={r.value} value={r.value}>
-              {r.label}
-            </option>
-          ))}
-        </select>
+              <section>
+                <Label
+                  htmlFor="region"
+                  className="mb-3 block text-xs font-medium uppercase tracking-wide text-neutral-500"
+                >
+                  {m.regionLabel}
+                </Label>
+                <select
+                  id="region"
+                  className={selectClass}
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value as Region)}
+                >
+                  {regionOptions.map((r) => (
+                    <option key={r.value} value={r.value}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+              </section>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <header className="mb-6">
+              <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+                {m.userInfoDesignTitle}
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                {m.userInfoDesignHint}
+              </p>
+            </header>
+
+            <div className="flex flex-wrap gap-2">
+              {DESIGN_TAG_LIST.map((t) => {
+                const on = designTags.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTag(t)}
+                    className={cn(
+                      "rounded-full border px-4 py-2.5 text-sm font-medium transition-colors",
+                      on
+                        ? "border-neutral-900 bg-neutral-900 text-white"
+                        : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400"
+                    )}
+                  >
+                    {m.designTags[t]}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <header className="mb-8">
+              <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+                {m.userInfoBodyTitle}
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                {m.userInfoBodyHint}
+              </p>
+            </header>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-neutral-600">
+                  {m.heightLabel}
+                </Label>
+                <select
+                  className={selectClass}
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(Number(e.target.value))}
+                >
+                  {heights().map((h) => (
+                    <option key={h} value={h}>
+                      {heightOptionLabel(h)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-neutral-600">
+                  {m.weightLabel}
+                </Label>
+                <select
+                  className={selectClass}
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(Number(e.target.value))}
+                >
+                  {weights().map((w) => (
+                    <option key={w} value={w}>
+                      {w}
+                      {m.weightUnit}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="space-y-3">
-        <p className="font-medium">{m.designLabel}</p>
-        <div className="grid grid-cols-2 gap-2">
-          {DESIGN_TAG_LIST.map((t) => (
-            <label
-              key={t}
-              className="flex cursor-pointer items-center gap-2 border border-neutral-200 px-2 py-2"
-            >
-              <Checkbox
-                checked={designTags.includes(t)}
-                onCheckedChange={() => toggleTag(t)}
-              />
-              <span>{m.designTags[t]}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>{m.heightLabel}</Label>
-          <select
-            className="w-full border border-neutral-200 bg-white px-2 py-3 text-base"
-            value={heightCm}
-            onChange={(e) => setHeightCm(Number(e.target.value))}
+      <div className="sticky bottom-0 z-50 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur-sm [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
+        {step === 1 && (
+          <Button
+            type="button"
+            className="h-12 min-h-12 w-full rounded-xl text-base font-medium"
+            onClick={() => setStep(2)}
           >
-            {heights().map((h) => (
-              <option key={h} value={h}>
-                {heightOptionLabel(h)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <Label>{m.weightLabel}</Label>
-          <select
-            className="w-full border border-neutral-200 bg-white px-2 py-3 text-base"
-            value={weightKg}
-            onChange={(e) => setWeightKg(Number(e.target.value))}
-          >
-            {weights().map((w) => (
-              <option key={w} value={w}>
-                {w}
-                {m.weightUnit}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      </div>
-
-      <div
-        className="sticky bottom-0 z-50 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur-sm [padding-bottom:max(1rem,env(safe-area-inset-bottom))]"
-      >
-        <Button
-          type="submit"
-          className="h-12 min-h-12 w-full rounded-md text-base"
-        >
-          {m.userInfoSubmit}
-        </Button>
+            {m.userInfoSubmit}
+          </Button>
+        )}
+        {step === 2 && (
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 min-h-12 flex-1 rounded-xl text-base"
+              onClick={() => setStep(1)}
+            >
+              {m.userInfoBack}
+            </Button>
+            <Button
+              type="button"
+              className="h-12 min-h-12 flex-[1.4] rounded-xl text-base font-medium"
+              onClick={() => setStep(3)}
+            >
+              {m.userInfoSubmit}
+            </Button>
+          </div>
+        )}
+        {step === 3 && (
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 min-h-12 flex-1 rounded-xl text-base"
+              onClick={() => setStep(2)}
+            >
+              {m.userInfoBack}
+            </Button>
+            <Button
+              type="submit"
+              className="h-12 min-h-12 flex-[1.4] rounded-xl text-base font-medium"
+            >
+              {m.userInfoSubmit}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   );
