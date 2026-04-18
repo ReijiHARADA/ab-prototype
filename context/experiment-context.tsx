@@ -330,28 +330,15 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       };
       setSessionPatternLogs((prev) => [...prev, log]);
 
-      if (args.action === "add_to_cart") {
+      if (
+        args.action === "add_to_cart" ||
+        args.action === "back" ||
+        args.action === "timeout"
+      ) {
         setStep("surveyPrompt");
         void logPatternResult(log);
         return;
       }
-
-      if (args.action === "back") {
-        setStep("surveyPrompt");
-        void logPatternResult(log);
-        return;
-      }
-
-      const next = conditionIndex + 1;
-      if (next >= CONDITION_ORDER.length) {
-        setStep("completed");
-        clearPersisted();
-        void logPatternResult(log);
-        return;
-      }
-      bumpPatternClock();
-      setConditionIndex(next);
-      void logPatternResult(log);
     },
     [
       language,
@@ -361,7 +348,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       conditionIndex,
       currentConditionId,
       socialProofText,
-      bumpPatternClock,
     ]
   );
 
