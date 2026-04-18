@@ -135,7 +135,7 @@ export function UserInfoForm() {
                       type="button"
                       onClick={() => setGender(g)}
                       className={cn(
-                        "w-full rounded-full border px-4 py-3.5 text-left text-sm font-medium transition-colors",
+                        "w-full rounded-full border px-4 py-3.5 text-center text-sm font-medium transition-colors",
                         gender === g
                           ? "border-neutral-900 bg-neutral-900 text-white"
                           : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400"
