@@ -18,6 +18,7 @@ const ja = {
   surveyPromptBody:
     "続けるには、Google formのアンケートに回答してください。",
   surveyPromptCta: "次の画面へ",
+  socialProofCarouselAria: "ソーシャルプルーフ画像（横にスワイプ）",
   ageLabel: "年齢層",
   genderLabel: "性別",
   regionLabel: "居住地域",
@@ -120,6 +121,7 @@ const ko = {
   surveyPromptBody:
     "계속하려면 Google Form 설문에 응답해 주세요.",
   surveyPromptCta: "다음 화면으로",
+  socialProofCarouselAria: "소셜 프루프 이미지(가로로 스와이프)",
   ageLabel: "연령대",
   genderLabel: "성별",
   regionLabel: "거주 지역",

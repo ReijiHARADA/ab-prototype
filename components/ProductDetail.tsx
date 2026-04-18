@@ -177,6 +177,7 @@ export function ProductDetail() {
           <SocialProofMessage
             text={socialProofText}
             visible={showProof}
+            language={lang}
           />
           <Button
             type="button"
