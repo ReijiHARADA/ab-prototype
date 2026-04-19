@@ -16,7 +16,7 @@ export function SectionAccordion({
   onSectionInteract?: (sectionId: string) => void;
 }) {
   return (
-    <Accordion className="w-full border-t border-neutral-200">
+    <Accordion multiple className="w-full border-t border-neutral-200">
       {items.map((item) => (
         <AccordionItem key={item.id} value={item.id} className="border-neutral-200">
           <AccordionTrigger

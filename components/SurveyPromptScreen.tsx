@@ -38,24 +38,26 @@ export function SurveyPromptScreen() {
           {isLastSurvey ? m.surveyPromptLastBody : m.surveyPromptBody}
         </p>
       </div>
-      <div className="flex items-start gap-3">
-        <Checkbox
-          id={SURVEY_CONFIRMED_ID}
-          checked={confirmed}
-          onCheckedChange={(checked) => setConfirmed(checked === true)}
-          className="mt-0.5"
-        />
-        <Label
-          htmlFor={SURVEY_CONFIRMED_ID}
-          className="cursor-pointer text-left text-sm font-normal leading-snug text-neutral-800"
-        >
-          {m.surveyPromptCheckboxLabel}
-        </Label>
-      </div>
+      {!isLastSurvey && (
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id={SURVEY_CONFIRMED_ID}
+            checked={confirmed}
+            onCheckedChange={(checked) => setConfirmed(checked === true)}
+            className="mt-0.5"
+          />
+          <Label
+            htmlFor={SURVEY_CONFIRMED_ID}
+            className="cursor-pointer text-left text-sm font-normal leading-snug text-neutral-800"
+          >
+            {m.surveyPromptCheckboxLabel}
+          </Label>
+        </div>
+      )}
       <Button
         type="button"
         className="h-12 w-full rounded-md text-base"
-        disabled={!confirmed}
+        disabled={!isLastSurvey && !confirmed}
         onClick={() => advanceFromSurveyPrompt()}
       >
         {isLastSurvey ? m.surveyPromptLastCta : m.surveyPromptCta}
