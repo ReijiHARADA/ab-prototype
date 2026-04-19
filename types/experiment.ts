@@ -26,14 +26,14 @@ export type RegionKo =
 export type Region = RegionJa | RegionKo;
 
 export type DesignTag =
-  | "monotone"
-  | "minimal"
+  | "simple"
+  | "mode"
+  | "classic"
   | "casual"
-  | "clean"
   | "street"
-  | "luxury"
-  | "basic"
-  | "trendy";
+  | "feminine"
+  | "sporty"
+  | "y2k";
 
 export type BodyTypeKey = "slim" | "standard" | "solid" | "large";
 

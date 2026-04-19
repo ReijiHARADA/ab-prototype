@@ -28,7 +28,7 @@ import type {
   UserInfo,
 } from "@/types/experiment";
 
-const STORAGE_KEY = "ab-experiment-state-v1";
+const STORAGE_KEY = "ab-experiment-state-v2";
 
 interface PersistedV1 {
   version: 1;

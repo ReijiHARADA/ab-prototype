@@ -30,7 +30,7 @@ function labelForUser(
   const designPick =
     u.designTags.length > 0
       ? m.designTags[u.designTags[0]!]
-      : m.designTags.basic;
+      : m.designTags.simple;
   return {
     ageGroup: m.ages[u.ageGroup],
     gender: m.genders[u.gender],

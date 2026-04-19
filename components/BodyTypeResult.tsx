@@ -14,16 +14,17 @@ export function BodyTypeResult() {
 
   return (
     <div className="flex min-h-[55vh] flex-col justify-center gap-8 px-6 py-12">
-      <div className="space-y-4">
-        <h1 className="text-lg font-medium">{m.bodyTypeScreenTitle}</h1>
-        <p className="text-base leading-relaxed">
-          {m.bodyTypeYourType(label)}
+      <div className="space-y-6">
+        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
+          {m.bodyTypeScreenTitle}
         </p>
+        <div className="rounded-2xl border-2 border-neutral-900 bg-neutral-50 px-5 py-7">
+          <p className="text-center text-[1.35rem] font-bold leading-snug tracking-tight text-neutral-900 sm:text-2xl">
+            {m.bodyTypeYourType(label)}
+          </p>
+        </div>
         <p className="text-sm leading-relaxed text-neutral-600">
           {m.bodyTypeExplanation}
-        </p>
-        <p className="text-xs text-neutral-500">
-          BMI: {Math.round(userInfo.bmi * 10) / 10}
         </p>
       </div>
       <Button
