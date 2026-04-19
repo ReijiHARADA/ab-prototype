@@ -40,7 +40,6 @@ export function buildParticipantSessionLog(
     durationSec: log.durationSec,
     durationMs: log.durationMs,
     selectedSize: log.selectedSize,
-    selectedColor: log.selectedColor,
     quantity: log.quantity,
     startedAt: log.startedAt,
     endedAt: log.endedAt,

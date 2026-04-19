@@ -118,7 +118,6 @@ interface ExperimentContextValue {
     action: PatternAction;
     actionDetail?: string;
     selectedSize: string;
-    selectedColor: string;
     quantity: number;
     interactionCounts: ProductInteractionCounts;
   }) => void;
@@ -317,7 +316,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       action: PatternAction;
       actionDetail?: string;
       selectedSize: string;
-      selectedColor: string;
       quantity: number;
       interactionCounts: ProductInteractionCounts;
     }) => {
@@ -346,7 +344,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         durationMs,
         durationSec: Math.round(durationMs / 1000),
         selectedSize: args.selectedSize,
-        selectedColor: args.selectedColor,
         quantity: args.quantity,
       };
       setSessionPatternLogs((prev) => [...prev, log]);

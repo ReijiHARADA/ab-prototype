@@ -8,6 +8,16 @@ const B: ConditionId = "design_preference";
 const C: ConditionId = "body_type";
 
 /**
+ * スプレッドシート・CSV の列ブロック順（表示順パターンに依らず常にこの順）
+ * — 何もなし → デザインの好み → 体型
+ */
+export const CANONICAL_CONDITION_ORDER: readonly ConditionId[] = [
+  A,
+  B,
+  C,
+] as const;
+
+/**
  * パターン定義（言語選択後にユーザーが選ぶ）
  * - パターン1: abc … なし → デザインの好み → 体型
  * - パターン2: acb … なし → 体型 → デザインの好み

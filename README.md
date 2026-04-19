@@ -81,7 +81,7 @@ npm run build
 - `socialProofText`: 画面上に出した文言
 - `action`: `timeout` | `back` | `add_to_cart`
 - `durationSec`: 滞在時間（秒）
-- `selectedSize`, `selectedColor`, `quantity`
+- `selectedSize`, `quantity`
 
 ### EventLog（任意）
 

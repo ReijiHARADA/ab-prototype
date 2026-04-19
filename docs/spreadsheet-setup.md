@@ -17,7 +17,8 @@ flowchart LR
 
 送信する JSON の形は **`types/experiment.ts` の `ParticipantSessionLog`**、GAS の `appendRow` の**値の列順**は **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと一致しやすいです。**1 行目の表示名**は **`jp` シート＝日本語、`kr` シート＝韓国語**（`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と GAS の `buildParticipantSessionHeadersForTab`）。
 
-**シートの行の意味:** **1 行目＝列ヘッダ**、**2 行目以降＝参加者データ**。GAS の例（`ensureParticipantSessionHeaderRow`）は、シートが空のときだけ 1 行目にヘッダを自動で書きます。
+**シートの行の意味:** **1 行目＝列ヘッダ**、**2 行目以降＝参加者データ**。GAS の例（`ensureParticipantSessionHeaderRow`）は、シートが空のときだけ 1 行目にヘッダを自動で書きます。  
+**条件ごとの列ブロックの並び**は、表示パターンの訪問順ではなく **常に「何もなし（none）→ デザインの好み（design_preference）→ 体型（body_type）」** です（`lib/experiment.ts` の `CANONICAL_CONDITION_ORDER`）。
 
 **GAS のコピペ例（`doPost`・`sheetTab`・`appendRow`）**は **[google-apps-script-participant-session.md](./google-apps-script-participant-session.md)** を参照してください。
 

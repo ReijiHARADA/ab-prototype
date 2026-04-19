@@ -1,20 +1,21 @@
-import type { Language } from "@/types/experiment";
+import type { ConditionId, Language } from "@/types/experiment";
 
+import { CANONICAL_CONDITION_ORDER } from "@/lib/experiment";
 import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
 
-const ROUND_FIELD_KEYS = [
+/** データ列のキー（英語）。順序は CANONICAL_CONDITION_ORDER（なし→デザイン→体型） */
+export const ROUND_FIELD_KEYS = [
   "conditionId",
   "socialProofText",
   "action",
   "durationSec",
   "selectedSize",
-  "selectedColor",
   "quantity",
   "startedAt",
   "endedAt",
 ] as const;
 
-/** 列順は `lib/csv.ts` のデータ行と同一（英語キー名・スプレッドシート非表示用） */
+/** 列順は `lib/csv.ts` のデータ行と同一（英語キー名） */
 export const PARTICIPANT_SESSION_COLUMN_KEYS: string[] = [
   "sessionId",
   "language",
@@ -26,9 +27,9 @@ export const PARTICIPANT_SESSION_COLUMN_KEYS: string[] = [
   "weight",
   "bmi",
   "bodyType",
-  ...[0, 1, 2].flatMap((r) => [
-    ...ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`),
-    ...INTERACTION_COUNT_KEYS.map((k) => `round${r}_${k}`),
+  ...CANONICAL_CONDITION_ORDER.flatMap((cid) => [
+    ...ROUND_FIELD_KEYS.map((k) => `${cid}_${k}`),
+    ...INTERACTION_COUNT_KEYS.map((k) => `${cid}_${k}`),
   ]),
 ];
 
@@ -69,7 +70,6 @@ const ROUND_FIELD_LABELS: Record<
   action: { ja: "アクション", ko: "액션" },
   durationSec: { ja: "滞在秒", ko: "체류(초)" },
   selectedSize: { ja: "選択サイズ", ko: "선택 사이즈" },
-  selectedColor: { ja: "選択カラー", ko: "선택 색상" },
   quantity: { ja: "数量", ko: "수량" },
   startedAt: { ja: "開始日時", ko: "시작 시각" },
   endedAt: { ja: "終了日時", ko: "종료 시각" },
@@ -89,14 +89,17 @@ const INTERACTION_LABELS: Record<
   tap_add_to_cart: { ja: "カートに追加", ko: "장바구니 담기" },
 };
 
-function roundPrefix(r: number, lang: Language): string {
-  if (lang === "ja") return `第${r + 1}回`;
-  return `${r + 1}회차`;
-}
+/** スプレッドシート列の条件ブロック見出し（表示順ではなく固定順） */
+const CONDITION_BLOCK_LABELS: Record<ConditionId, { ja: string; ko: string }> =
+  {
+    none: { ja: "何もなし", ko: "없음" },
+    design_preference: { ja: "デザインの好み", ko: "디자인 선호" },
+    body_type: { ja: "体型", ko: "체형" },
+  };
 
 /**
  * スプレッドシート1行目・CSV1行目用の表示列名。
- * `jp` シート → 日本語、`kr` シート → 韓国語（`sheetTab` / UI `language` に対応）。
+ * `jp` シート → 日本語、`kr` シート → 韓国語。
  */
 export function getParticipantSessionCsvHeaders(lang: Language): string[] {
   const L = lang === "ko" ? "ko" : "ja";
@@ -115,13 +118,13 @@ export function getParticipantSessionCsvHeaders(lang: Language): string[] {
     ] as const
   ).map((k) => BASE_LABELS[k][L]);
 
-  for (let r = 0; r < 3; r++) {
-    const prefix = roundPrefix(r, lang);
+  for (const conditionId of CANONICAL_CONDITION_ORDER) {
+    const block = CONDITION_BLOCK_LABELS[conditionId][L];
     for (const k of ROUND_FIELD_KEYS) {
-      base.push(`${prefix}_${ROUND_FIELD_LABELS[k][L]}`);
+      base.push(`${block}_${ROUND_FIELD_LABELS[k][L]}`);
     }
     for (const k of INTERACTION_COUNT_KEYS) {
-      base.push(`${prefix}_${INTERACTION_LABELS[k][L]}`);
+      base.push(`${block}_${INTERACTION_LABELS[k][L]}`);
     }
   }
 

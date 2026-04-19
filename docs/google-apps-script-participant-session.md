@@ -24,7 +24,7 @@
 
 | 行 | 内容 |
 |----|------|
-| **1 行目** | 列ヘッダ（**`jp` シートは日本語、`kr` シートは韓国語**。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と同じ順・同じ文言） |
+| **1 行目** | 列ヘッダ（**`jp` シートは日本語、`kr` シートは韓国語**。条件ブロックは**常に「何もなし → デザインの好み → 体型」**の順。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と同じ順・同じ文言） |
 | **2 行目以降** | 参加者データ（`appendRow` で 1 行ずつ追加） |
 
 シートが空のときは、下記スクリプトが **初回の追記前に 1 行目へヘッダを自動で書き込み**ます。手動で 1 行目にヘッダを入れても構いません（その場合は `getLastRow() >= 1` のため、ヘッダの二重追加はされません）。
@@ -60,7 +60,6 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
       "durationSec": 12,
       "durationMs": 12000,
       "selectedSize": "M",
-      "selectedColor": "PINK",
       "quantity": 1,
       "startedAt": "…",
       "endedAt": "…"
@@ -77,7 +76,7 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 
 1. `body.sheetTab` が `"jp"` ならシート `jp`、`"kr"` ならシート `kr` を `getSheetByName` で取得する。  
 2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目にヘッダ行**を書く（**タブが `jp` なら日本語列名、`kr` なら韓国語列名**。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と一致させる）。  
-3. そのあと `appendRow` で **データ行**を追加する（列の**並び**は `buildParticipantRow`／`participantSessionsToCsv` の値の順と同じ。表示ヘッダだけ言語が変わる）。
+3. そのあと `appendRow` で **データ行**を追加する。各条件の列は **常に `none` → `design_preference` → `body_type`** の順（`rounds` の訪問順ではなく `conditionId` で対応付け）。`selectedColor` は含めない。
 
 ```javascript
 /**
@@ -128,17 +127,13 @@ var INTERACTION_KEYS = [
 ];
 
 /**
- * 各回のプレフィックス（第1回… / 1회차…）— lib/participantSessionHeaders.ts と同じ
+ * データ列の条件ブロック順（lib/experiment.ts の CANONICAL_CONDITION_ORDER と同じ）
  */
-function roundPrefixForHeaders(r, isKo) {
-  if (isKo) {
-    return r + 1 + "회차";
-  }
-  return "第" + (r + 1) + "回";
-}
+var CANONICAL_CONDITION_ORDER = ["none", "design_preference", "body_type"];
 
 /**
  * 列ヘッダ 1 行分。tabName が "kr" のとき韓国語、それ以外は日本語。
+ * 条件ブロックは「何もなし → デザインの好み → 体型」（表示パターンの訪問順ではない）。
  * lib/participantSessionHeaders.ts の getParticipantSessionCsvHeaders と文言を揃えること。
  */
 function buildParticipantSessionHeadersForTab(tabName) {
@@ -172,13 +167,15 @@ function buildParticipantSessionHeadersForTab(tabName) {
     );
   }
 
+  var blockJa = ["何もなし", "デザインの好み", "体型"];
+  var blockKo = ["없음", "디자인 선호", "체형"];
+
   var roundFieldJa = [
     "条件ID",
     "ソーシャルプルーフ文言",
     "アクション",
     "滞在秒",
     "選択サイズ",
-    "選択カラー",
     "数量",
     "開始日時",
     "終了日時",
@@ -189,7 +186,6 @@ function buildParticipantSessionHeadersForTab(tabName) {
     "액션",
     "체류(초)",
     "선택 사이즈",
-    "선택 색상",
     "수량",
     "시작 시각",
     "종료 시각",
@@ -215,8 +211,8 @@ function buildParticipantSessionHeadersForTab(tabName) {
     "장바구니 담기",
   ];
 
-  for (var r = 0; r < 3; r++) {
-    var prefix = roundPrefixForHeaders(r, isKo);
+  for (var b = 0; b < 3; b++) {
+    var prefix = isKo ? blockKo[b] : blockJa[b];
     var rf = isKo ? roundFieldKo : roundFieldJa;
     var ig = isKo ? interactionKo : interactionJa;
     for (var i = 0; i < rf.length; i++) {
@@ -258,6 +254,15 @@ function appendParticipantSession(body) {
  * アプリの CSV（participantSessionsToCsv）と同じ列順の 1 行配列を作る
  */
 
+function pickRoundByCondition(rounds, conditionId) {
+  for (var i = 0; i < rounds.length; i++) {
+    if (rounds[i].conditionId === conditionId) {
+      return rounds[i];
+    }
+  }
+  return null;
+}
+
 function buildParticipantRow(body) {
   var row = [
     body.sessionId,
@@ -273,10 +278,10 @@ function buildParticipantRow(body) {
   ];
 
   var rounds = body.rounds || [];
-  for (var r = 0; r < 3; r++) {
-    var round = rounds[r];
+  for (var c = 0; c < CANONICAL_CONDITION_ORDER.length; c++) {
+    var round = pickRoundByCondition(rounds, CANONICAL_CONDITION_ORDER[c]);
     if (!round) {
-      for (var i = 0; i < 9 + INTERACTION_KEYS.length; i++) {
+      for (var i = 0; i < 8 + INTERACTION_KEYS.length; i++) {
         row.push("");
       }
       continue;
@@ -287,7 +292,6 @@ function buildParticipantRow(body) {
       round.action,
       round.durationSec,
       round.selectedSize,
-      round.selectedColor,
       round.quantity,
       round.startedAt,
       round.endedAt

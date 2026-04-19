@@ -1,9 +1,11 @@
 import type { Language, ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
+import { CANONICAL_CONDITION_ORDER } from "@/lib/experiment";
 import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
 import {
   getParticipantSessionCsvHeaders,
   PARTICIPANT_SESSION_COLUMN_KEYS,
+  ROUND_FIELD_KEYS,
 } from "@/lib/participantSessionHeaders";
 
 function escapeCsvCell(value: string): string {
@@ -25,7 +27,6 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
     "actionDetail",
     "durationSec",
     "selectedSize",
-    "selectedColor",
     "quantity",
     "startedAt",
     "endedAt",
@@ -45,7 +46,6 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
       log.actionDetail ?? "",
       String(log.durationSec),
       log.selectedSize,
-      log.selectedColor,
       String(log.quantity),
       log.startedAt,
       log.endedAt,
@@ -55,18 +55,6 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
   }
   return lines.join("\n");
 }
-
-const ROUND_FIELD_KEYS = [
-  "conditionId",
-  "socialProofText",
-  "action",
-  "durationSec",
-  "selectedSize",
-  "selectedColor",
-  "quantity",
-  "startedAt",
-  "endedAt",
-] as const;
 
 /** 列の内部キー（英語・順序のみ）。表示用は {@link getParticipantSessionCsvHeaders}。 */
 export const PARTICIPANT_SESSION_CSV_HEADERS: string[] =
@@ -97,8 +85,8 @@ export function participantSessionsToCsv(
       String(p.bmi),
       p.bodyType,
     ];
-    for (let r = 0; r < 3; r++) {
-      const round = p.rounds[r];
+    for (const conditionId of CANONICAL_CONDITION_ORDER) {
+      const round = p.rounds.find((r) => r.conditionId === conditionId);
       if (!round) {
         for (let i = 0; i < ROUND_FIELD_KEYS.length; i++) row.push("");
         for (let i = 0; i < INTERACTION_COUNT_KEYS.length; i++) row.push("");
@@ -110,7 +98,6 @@ export function participantSessionsToCsv(
         round.action,
         String(round.durationSec),
         round.selectedSize,
-        round.selectedColor,
         String(round.quantity),
         round.startedAt,
         round.endedAt

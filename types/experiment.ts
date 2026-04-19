@@ -100,7 +100,6 @@ export interface ParticipantSessionLog {
     durationSec: number;
     durationMs: number;
     selectedSize: string;
-    selectedColor: string;
     quantity: number;
     startedAt: string;
     endedAt: string;
@@ -132,7 +131,6 @@ export interface PatternLog {
   durationMs: number;
   durationSec: number;
   selectedSize: string;
-  selectedColor: string;
   quantity: number;
 }
 

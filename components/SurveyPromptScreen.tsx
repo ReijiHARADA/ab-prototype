@@ -30,7 +30,7 @@ export function SurveyPromptScreen() {
           {m.surveyPromptBody}
         </p>
       </div>
-      <div className="flex items-start gap-3 rounded-lg border border-neutral-200 bg-neutral-50/80 px-4 py-3">
+      <div className="flex items-start gap-3">
         <Checkbox
           id={SURVEY_CONFIRMED_ID}
           checked={confirmed}

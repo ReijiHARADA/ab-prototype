@@ -81,8 +81,8 @@ export function ResultDashboard() {
         <h1 className="text-lg font-medium">{m.resultTitle}</h1>
         <p className="text-xs text-neutral-600">
           {lang === "ja"
-            ? "CSV は1参加者1行です（3条件分を横に展開）。1行目の列名は UI 言語（日本語／韓国語）に合わせます。sheetTab（jp / kr）で記録先シートを分けられます。"
-            : "CSV는 참가자 1명당 1행입니다(3개 조건을 가로로 펼침). 첫 행 열 이름은 UI 언어에 맞춥니다. sheetTab(jp/kr)으로 기록 시트를 구분합니다."}
+            ? "CSV は1参加者1行です。条件列は常に「なし→デザイン→体型」の順。1行目の列名は UI 言語に合わせます。sheetTab（jp / kr）で記録先シートを分けられます。"
+            : "CSV는 참가자 1명당 1행입니다. 조건 열은 항상 없음→디자인→체형 순입니다. 첫 행은 UI 언어. sheetTab(jp/kr)으로 시트를 구분합니다."}
         </p>
         <Button
           type="button"

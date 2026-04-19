@@ -62,10 +62,9 @@ export function ProductDetail() {
   const selectionsRef = useRef({
     size: "M" as string,
     quantity: 1,
-    color: "PINK",
   });
   useEffect(() => {
-    selectionsRef.current = { size: "M", quantity, color: "PINK" };
+    selectionsRef.current = { size: "M", quantity };
   }, [quantity]);
 
   const finishedRef = useRef(false);
@@ -83,7 +82,7 @@ export function ProductDetail() {
       interactionCountsRef.current.tap_add_to_cart++;
     }
     finishedRef.current = true;
-    const { size: sz, quantity: q, color: c } = selectionsRef.current;
+    const { size: sz, quantity: q } = selectionsRef.current;
     completePatternRef.current({
       action:
         action === "add_to_cart"
@@ -92,7 +91,6 @@ export function ProductDetail() {
             ? "back"
             : "timeout",
       selectedSize: sz,
-      selectedColor: c,
       quantity: q,
       interactionCounts: { ...interactionCountsRef.current },
     });
