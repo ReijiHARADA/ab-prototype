@@ -27,7 +27,7 @@ export function PatternSelectScreen() {
   return (
     <div className="flex min-h-dvh flex-col">
       <div className="flex flex-1 flex-col px-5 pb-4 pt-8">
-        <div className="mb-5 rounded-2xl border-2 border-red-600 bg-red-50/40 p-4">
+        <div className="mb-5 rounded-2xl border-2 border-red-600 bg-white p-4">
           <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-red-600">
             {m.experimenterOnlyBadge}
           </p>
@@ -59,7 +59,7 @@ export function PatternSelectScreen() {
                   "flex w-full items-center justify-between rounded-xl border-2 px-4 py-3.5 text-left transition-colors",
                   selected
                     ? "border-red-600 bg-red-600 text-white"
-                    : "border-neutral-200 bg-white text-neutral-900 hover:border-red-300 hover:bg-red-50/50"
+                    : "border-neutral-200 bg-white text-neutral-900 hover:border-neutral-400 hover:bg-white"
                 )}
               >
                 <span
@@ -84,7 +84,7 @@ export function PatternSelectScreen() {
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-50 border-t border-red-100 bg-white/95 px-5 py-4 backdrop-blur-sm [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 z-50 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur-sm [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           disabled={selectedPattern == null}

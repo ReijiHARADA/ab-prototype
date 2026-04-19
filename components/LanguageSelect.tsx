@@ -16,7 +16,7 @@ export function LanguageSelect() {
 
   return (
     <div className="flex min-h-[60vh] flex-col justify-center px-5 py-10">
-      <div className="mx-auto w-full max-w-md rounded-2xl border-2 border-red-600 bg-red-50/40 p-6 shadow-sm">
+      <div className="mx-auto w-full max-w-md rounded-2xl border-2 border-red-600 bg-white p-6 shadow-sm">
         <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wider text-red-600">
           {jaM.experimenterOnlyBadge}
         </p>
