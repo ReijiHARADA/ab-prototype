@@ -79,6 +79,9 @@ const ja = {
     "この情報は、後の商品詳細画面で一部の表示に反映されます。",
   bodyTypeYourType: (label: string) =>
     `あなたの体型タイプは「${label}」です。`,
+  /** 体型ソーシャルプルーフの太字部分（例: スタンダード型の方）— label は BMI 区分に対応する bodyTypeLabels の値 */
+  socialProofBodyTypeLead: (label: string) => `${label}型の方`,
+  socialProofBodyTypeTail: "によく選ばれている商品です",
   viewProduct: "商品を見る",
   productInStock: "在庫あり",
   productPrice: "¥1,990",
@@ -199,6 +202,8 @@ const ko = {
     "이 정보는 이후 상품 상세 화면의 일부 문구에 반영됩니다.",
   bodyTypeYourType: (label: string) =>
     `당신의 체형 타입은 "${label}"입니다.`,
+  socialProofBodyTypeLead: (label: string) => `${label}형의 분들`,
+  socialProofBodyTypeTail: "이 자주 선택하는 상품입니다",
   viewProduct: "상품 보기",
   productInStock: "재고 있음",
   productPrice: "₩19,900",

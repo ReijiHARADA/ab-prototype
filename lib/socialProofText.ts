@@ -9,8 +9,6 @@ export interface SocialProofContext {
   language: Language;
   user: UserInfo;
   conditionId: ConditionId;
-  /** body_type で身長ベース文言を使うか（false なら体型ラベル） */
-  useHeightForBodyType: boolean;
 }
 
 export type SocialProofSegment = { bold?: boolean; text: string };
@@ -36,7 +34,7 @@ function labelForUser(
 export function getSocialProofSegments(
   ctx: SocialProofContext
 ): SocialProofSegment[] {
-  const { conditionId, language, user, useHeightForBodyType } = ctx;
+  const { conditionId, language, user } = ctx;
   const m = getMessages(language);
   const L = labelForUser(m, user);
 
@@ -52,26 +50,13 @@ export function getSocialProofSegments(
             { text: `에게 인기 있는 상품입니다` },
           ];
     case "body_type":
-      if (useHeightForBodyType) {
-        return language === "ja"
-          ? [
-              { bold: true, text: `${user.heightCm}cm前後の方` },
-              { text: `によく選ばれている商品です` },
-            ]
-          : [
-              { bold: true, text: `${user.heightCm}cm 전후의 분들` },
-              { text: `이 자주 선택하는 상품입니다` },
-            ];
-      }
-      return language === "ja"
-        ? [
-            { bold: true, text: `${L.bodyTypeLabel}体型の方` },
-            { text: `によく購入されている商品です` },
-          ]
-        : [
-            { bold: true, text: `${L.bodyTypeLabel} 체형의 분들` },
-            { text: `이 자주 구매하는 상품입니다` },
-          ];
+      return [
+        {
+          bold: true,
+          text: m.socialProofBodyTypeLead(L.bodyTypeLabel),
+        },
+        { text: m.socialProofBodyTypeTail },
+      ];
     case "none":
       return [];
     default:

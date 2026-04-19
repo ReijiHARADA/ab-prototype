@@ -99,7 +99,6 @@ interface ExperimentContextValue {
   currentConditionId: ConditionId;
   socialProofText: string;
   socialProofSegments: SocialProofSegment[];
-  useHeightForBodyType: boolean;
   sessionId: string;
   experimentStartedAt: string | null;
   patternStartedAt: string | null;
@@ -228,8 +227,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     [conditionIndex]
   );
 
-  const useHeightForBodyType = conditionIndex % 2 === 0;
-
   const socialProofCtx = useMemo(
     () =>
       language && userInfo
@@ -237,10 +234,9 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
             language,
             user: userInfo,
             conditionId: currentConditionId,
-            useHeightForBodyType,
           }
         : null,
-    [language, userInfo, currentConditionId, useHeightForBodyType]
+    [language, userInfo, currentConditionId]
   );
 
   const socialProofSegments = useMemo(
@@ -353,7 +349,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     currentConditionId,
     socialProofText,
     socialProofSegments,
-    useHeightForBodyType,
     sessionId,
     experimentStartedAt,
     patternStartedAt,
