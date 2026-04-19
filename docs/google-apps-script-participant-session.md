@@ -24,7 +24,7 @@
 
 | 行 | 内容 |
 |----|------|
-| **1 行目** | 列ヘッダ（`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` と同じ順） |
+| **1 行目** | 列ヘッダ（**`jp` シートは日本語、`kr` シートは韓国語**。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と同じ順・同じ文言） |
 | **2 行目以降** | 参加者データ（`appendRow` で 1 行ずつ追加） |
 
 シートが空のときは、下記スクリプトが **初回の追記前に 1 行目へヘッダを自動で書き込み**ます。手動で 1 行目にヘッダを入れても構いません（その場合は `getLastRow() >= 1` のため、ヘッダの二重追加はされません）。
@@ -76,8 +76,8 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 **やることは次の 2 点だけです。**
 
 1. `body.sheetTab` が `"jp"` ならシート `jp`、`"kr"` ならシート `kr` を `getSheetByName` で取得する。  
-2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目にヘッダ行**を書く（`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` と同じ順）。  
-3. そのあと `appendRow` で **データ行**を追加する（列順は `buildParticipantRow`／`participantSessionsToCsv` と揃える）。
+2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目にヘッダ行**を書く（**タブが `jp` なら日本語列名、`kr` なら韓国語列名**。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と一致させる）。  
+3. そのあと `appendRow` で **データ行**を追加する（列の**並び**は `buildParticipantRow`／`participantSessionsToCsv` の値の順と同じ。表示ヘッダだけ言語が変わる）。
 
 ```javascript
 /**
@@ -128,49 +128,113 @@ var INTERACTION_KEYS = [
 ];
 
 /**
- * 列ヘッダ 1 行分（lib/csv.ts の PARTICIPANT_SESSION_CSV_HEADERS と同じ順を生成）
+ * 各回のプレフィックス（第1回… / 1회차…）— lib/participantSessionHeaders.ts と同じ
  */
-function buildParticipantSessionHeaders() {
-  var headers = [
-    "sessionId",
-    "language",
-    "sheetTab",
-    "sequencePattern",
-    "experimentStartedAt",
-    "designTags",
-    "height",
-    "weight",
-    "bmi",
-    "bodyType",
+function roundPrefixForHeaders(r, isKo) {
+  if (isKo) {
+    return r + 1 + "회차";
+  }
+  return "第" + (r + 1) + "回";
+}
+
+/**
+ * 列ヘッダ 1 行分。tabName が "kr" のとき韓国語、それ以外は日本語。
+ * lib/participantSessionHeaders.ts の getParticipantSessionCsvHeaders と文言を揃えること。
+ */
+function buildParticipantSessionHeadersForTab(tabName) {
+  var isKo = tabName === "kr";
+  var headers = [];
+  if (!isKo) {
+    headers.push(
+      "セッションID",
+      "言語",
+      "記録シート",
+      "表示順パターン",
+      "実験開始日時",
+      "デザイン好み",
+      "身長_cm",
+      "体重_kg",
+      "BMI",
+      "体型"
+    );
+  } else {
+    headers.push(
+      "세션 ID",
+      "언어",
+      "기록 시트",
+      "표시 순서 패턴",
+      "실험 시작 시각",
+      "디자인 선호",
+      "키_cm",
+      "체중_kg",
+      "BMI",
+      "체형"
+    );
+  }
+
+  var roundFieldJa = [
+    "条件ID",
+    "ソーシャルプルーフ文言",
+    "アクション",
+    "滞在秒",
+    "選択サイズ",
+    "選択カラー",
+    "数量",
+    "開始日時",
+    "終了日時",
   ];
-  var roundFields = [
-    "conditionId",
-    "socialProofText",
-    "action",
-    "durationSec",
-    "selectedSize",
-    "selectedColor",
-    "quantity",
-    "startedAt",
-    "endedAt",
+  var roundFieldKo = [
+    "조건 ID",
+    "소셜 프루프 문구",
+    "액션",
+    "체류(초)",
+    "선택 사이즈",
+    "선택 색상",
+    "수량",
+    "시작 시각",
+    "종료 시각",
   ];
+  var interactionJa = [
+    "アコーディオン_概要",
+    "アコーディオン_詳細",
+    "アコーディオン_仕様",
+    "アコーディオン_お手入れ",
+    "お気に入り",
+    "数量プラス",
+    "数量マイナス",
+    "カートに追加",
+  ];
+  var interactionKo = [
+    "아코디언_개요",
+    "아코디언_상세",
+    "아코디언_사양",
+    "아코디언_관리",
+    "즐겨찾기",
+    "수량+",
+    "수량-",
+    "장바구니 담기",
+  ];
+
   for (var r = 0; r < 3; r++) {
-    for (var i = 0; i < roundFields.length; i++) {
-      headers.push("round" + r + "_" + roundFields[i]);
+    var prefix = roundPrefixForHeaders(r, isKo);
+    var rf = isKo ? roundFieldKo : roundFieldJa;
+    var ig = isKo ? interactionKo : interactionJa;
+    for (var i = 0; i < rf.length; i++) {
+      headers.push(prefix + "_" + rf[i]);
     }
-    for (var j = 0; j < INTERACTION_KEYS.length; j++) {
-      headers.push("round" + r + "_" + INTERACTION_KEYS[j]);
+    for (var j = 0; j < ig.length; j++) {
+      headers.push(prefix + "_" + ig[j]);
     }
   }
   return headers;
 }
 
 /**
- * シートが空のときだけ 1 行目にヘッダを書く（既に行がある場合は何もしない）
+ * シートが空のときだけ 1 行目にヘッダを書く（jp=日本語 / kr=韓国語）
  */
-function ensureParticipantSessionHeaderRow(sheet) {
+function ensureParticipantSessionHeaderRow(sheet, tabName) {
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(buildParticipantSessionHeaders());
+    sheet.appendRow(buildParticipantSessionHeadersForTab(tabName));
   }
 }
 
@@ -185,7 +249,7 @@ function appendParticipantSession(body) {
     throw new Error("シートが見つかりません: " + tabName + "（タブ名を jp / kr にしてください）");
   }
 
-  ensureParticipantSessionHeaderRow(sheet);
+  ensureParticipantSessionHeaderRow(sheet, tabName);
   var row = buildParticipantRow(body);
   sheet.appendRow(row);
 }
@@ -253,7 +317,7 @@ function jsonResponse(obj) {
 | 2 | `body.type === "participantSession"` なら記録処理へ |
 | 3 | `body.sheetTab` を見る。`"kr"` ならシート名 **`kr`**、それ以外（通常は `"jp"`）なら **`jp`** |
 | 4 | `SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(tabName)` でシート取得 |
-| 5 | **`getLastRow() === 0` なら** `buildParticipantSessionHeaders()` を `appendRow` し、**1 行目をヘッダにする** |
+| 5 | **`getLastRow() === 0` なら** `buildParticipantSessionHeadersForTab(tabName)` を `appendRow` し、**1 行目をヘッダにする**（`jp`＝日本語、`kr`＝韓国語） |
 | 6 | `buildParticipantRow(body)` を `appendRow` し、**2 行目以降にデータを追加** |
 
 ---
@@ -263,4 +327,4 @@ function jsonResponse(obj) {
 1. Vercel の **`LOG_ENDPOINT`** に、この GAS の **ウェブアプリ URL**（`/exec` で終わるもの）を設定する。  
 2. アプリで実験を最後まで完了し、`jp` または `kr` を開いて行が増えているか確認する。
 
-列定義は **`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` / `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。
+表示列名は **`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders`**（`jp`/`kr` に対応）、データ列の並びは **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。

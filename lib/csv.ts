@@ -1,6 +1,10 @@
-import type { ParticipantSessionLog, PatternLog } from "@/types/experiment";
+import type { Language, ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
 import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
+import {
+  getParticipantSessionCsvHeaders,
+  PARTICIPANT_SESSION_COLUMN_KEYS,
+} from "@/lib/participantSessionHeaders";
 
 function escapeCsvCell(value: string): string {
   if (/[",\n\r]/.test(value)) {
@@ -64,28 +68,22 @@ const ROUND_FIELD_KEYS = [
   "endedAt",
 ] as const;
 
-/** スプレッドシート1行目・CSV1行目と同じ列名（`participantSessionsToCsv` と GAS で共有） */
-export const PARTICIPANT_SESSION_CSV_HEADERS: string[] = [
-  "sessionId",
-  "language",
-  "sheetTab",
-  "sequencePattern",
-  "experimentStartedAt",
-  "designTags",
-  "height",
-  "weight",
-  "bmi",
-  "bodyType",
-  ...[0, 1, 2].flatMap((r) => [
-    ...ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`),
-    ...INTERACTION_COUNT_KEYS.map((k) => `round${r}_${k}`),
-  ]),
-];
+/** 列の内部キー（英語・順序のみ）。表示用は {@link getParticipantSessionCsvHeaders}。 */
+export const PARTICIPANT_SESSION_CSV_HEADERS: string[] =
+  PARTICIPANT_SESSION_COLUMN_KEYS;
 
-/** 1参加者1行（3条件分を横に展開）。Excel 取り込み用。 */
-export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string {
-  const headers = PARTICIPANT_SESSION_CSV_HEADERS;
-  const lines = [headers.join(",")];
+export { getParticipantSessionCsvHeaders, PARTICIPANT_SESSION_COLUMN_KEYS };
+
+/** 1参加者1行（3条件分を横に展開）。Excel 取り込み用。1行目は `headerLanguage`（未指定時は先頭の `logs[].language`）。 */
+export function participantSessionsToCsv(
+  logs: ParticipantSessionLog[],
+  headerLanguage?: Language
+): string {
+  const lang =
+    headerLanguage ??
+    (logs[0]?.language === "ko" ? "ko" : "ja");
+  const headers = getParticipantSessionCsvHeaders(lang);
+  const lines = [headers.map((h) => escapeCsvCell(h)).join(",")];
   for (const p of logs) {
     const row: string[] = [
       p.sessionId,

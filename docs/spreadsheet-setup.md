@@ -15,7 +15,7 @@ flowchart LR
 3. **Vercel**（またはローカル）の環境変数 **`LOG_ENDPOINT`** にその URL を入れる。  
 4. 参加者が実験を**最後まで完了**すると、JSON が GAS に届き、**`sheetTab` に応じて `jp` または `kr` シート**に 1 行追加される。
 
-送信する JSON の形は **`types/experiment.ts` の `ParticipantSessionLog`**、GAS の `appendRow` の列順は **`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` / `participantSessionsToCsv`** と揃えると、CSV ダウンロードと一致しやすいです。
+送信する JSON の形は **`types/experiment.ts` の `ParticipantSessionLog`**、GAS の `appendRow` の**値の列順**は **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと一致しやすいです。**1 行目の表示名**は **`jp` シート＝日本語、`kr` シート＝韓国語**（`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と GAS の `buildParticipantSessionHeadersForTab`）。
 
 **シートの行の意味:** **1 行目＝列ヘッダ**、**2 行目以降＝参加者データ**。GAS の例（`ensureParticipantSessionHeaderRow`）は、シートが空のときだけ 1 行目にヘッダを自動で書きます。
 
@@ -97,7 +97,7 @@ LOG_ENDPOINT=https://script.google.com/macros/s/……/exec
 | 行が増えない | Vercel の `LOG_ENDPOINT`、再デプロイ、`/api/log` が 200 か |
 | `/api/log` が 503 | サーバーに `LOG_ENDPOINT` が無い |
 | GAS でエラー | Apps Script の **実行ログ**（表示 → ログ）。`sheetTab` に応じた **`jp` / `kr` シートが存在するか** |
-| 列がずれる | シートの **列順** と GAS の `appendRow` の **配列の順**を一致させる（[`lib/csv.ts`](../lib/csv.ts) の `PARTICIPANT_SESSION_CSV_HEADERS` 参照） |
+| 列がずれる | データ行の **列の並び** と GAS の `buildParticipantRow` / [`participantSessionsToCsv`](../lib/csv.ts) の **値の順**を一致させる（ヘッダ行は言語付きで表示のみ） |
 
 ---
 
@@ -107,7 +107,7 @@ LOG_ENDPOINT=https://script.google.com/macros/s/……/exec
 |------|----------|
 | 送信処理 | [`lib/logger.ts`](../lib/logger.ts) の `logParticipantSession` |
 | 1 行分のデータ型 | [`types/experiment.ts`](../types/experiment.ts) の `ParticipantSessionLog` |
-| CSV と同じ列イメージ | [`lib/csv.ts`](../lib/csv.ts) の `PARTICIPANT_SESSION_CSV_HEADERS` / `participantSessionsToCsv` |
+| CSV と同じ列イメージ | [`lib/participantSessionHeaders.ts`](../lib/participantSessionHeaders.ts) の `getParticipantSessionCsvHeaders`（見出し）／[`lib/csv.ts`](../lib/csv.ts) の `participantSessionsToCsv`（データ） |
 | API プロキシ | [`app/api/log/route.ts`](../app/api/log/route.ts) |
 
 補助の `logEvent` や旧 `pattern` 形式は [`google-apps-script.md`](./google-apps-script.md) の記述が古い場合があります。**本番の主ログは `participantSession`** です。
