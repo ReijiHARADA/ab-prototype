@@ -1,5 +1,7 @@
 import type { ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
+import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
+
 function escapeCsvCell(value: string): string {
   if (/[",\n\r]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -23,9 +25,11 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
     "quantity",
     "startedAt",
     "endedAt",
+    ...INTERACTION_COUNT_KEYS,
   ];
   const lines = [headers.join(",")];
   for (const log of logs) {
+    const ic = log.interactionCounts;
     const row = [
       log.sessionId,
       log.language,
@@ -41,6 +45,7 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
       String(log.quantity),
       log.startedAt,
       log.endedAt,
+      ...INTERACTION_COUNT_KEYS.map((k) => String(ic[k])),
     ].map((cell) => escapeCsvCell(String(cell)));
     lines.push(row.join(","));
   }
@@ -67,17 +72,15 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
     "sheetTab",
     "sequencePattern",
     "experimentStartedAt",
-    "ageGroup",
-    "gender",
-    "region",
     "designTags",
     "height",
     "weight",
     "bmi",
     "bodyType",
-    ...[0, 1, 2].flatMap((r) =>
-      ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`)
-    ),
+    ...[0, 1, 2].flatMap((r) => [
+      ...ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`),
+      ...INTERACTION_COUNT_KEYS.map((k) => `round${r}_${k}`),
+    ]),
   ];
   const lines = [headers.join(",")];
   for (const p of logs) {
@@ -87,9 +90,6 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
       p.sheetTab,
       String(p.sequencePattern),
       p.experimentStartedAt ?? "",
-      p.ageGroup,
-      p.gender,
-      p.region,
       p.designTagsJoined,
       String(p.height),
       String(p.weight),
@@ -100,6 +100,7 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
       const round = p.rounds[r];
       if (!round) {
         for (let i = 0; i < ROUND_FIELD_KEYS.length; i++) row.push("");
+        for (let i = 0; i < INTERACTION_COUNT_KEYS.length; i++) row.push("");
         continue;
       }
       row.push(
@@ -113,6 +114,10 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
         round.startedAt,
         round.endedAt
       );
+      const ic = round.interactionCounts;
+      for (const k of INTERACTION_COUNT_KEYS) {
+        row.push(String(ic[k]));
+      }
     }
     lines.push(row.map((cell) => escapeCsvCell(String(cell))).join(","));
   }

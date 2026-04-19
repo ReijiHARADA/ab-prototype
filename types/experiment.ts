@@ -58,6 +58,19 @@ export type SequencePatternId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type PatternAction = "add_to_cart" | "back" | "timeout";
 
+/** 商品詳細1画面あたりの操作回数（タップベース） */
+export interface ProductInteractionCounts {
+  accordion_about: number;
+  accordion_detail: number;
+  accordion_spec: number;
+  accordion_care: number;
+  /** お気に入りボタンのトグル回数 */
+  favorite_toggle: number;
+  quantity_plus: number;
+  quantity_minus: number;
+  tap_add_to_cart: number;
+}
+
 export interface ExperimentSession {
   sessionId: string;
   language: Language;
@@ -74,9 +87,6 @@ export interface ParticipantSessionLog {
   sheetTab: SpreadsheetSheetTab;
   sequencePattern: SequencePatternId;
   experimentStartedAt?: string;
-  ageGroup: string;
-  gender: string;
-  region: string;
   designTagsJoined: string;
   height: number;
   weight: number;
@@ -94,6 +104,7 @@ export interface ParticipantSessionLog {
     quantity: number;
     startedAt: string;
     endedAt: string;
+    interactionCounts: ProductInteractionCounts;
   }>;
 }
 
@@ -106,15 +117,13 @@ export interface PatternLog {
   conditionId: ConditionId;
   socialProofText: string;
   userInfo: {
-    ageGroup: string;
-    gender: string;
-    region: string;
     designTags: string[];
     height: number;
     weight: number;
     bmi: number;
     bodyType: string;
   };
+  interactionCounts: ProductInteractionCounts;
   productId: "waffle-henley-shirt";
   action: PatternAction;
   actionDetail?: string;

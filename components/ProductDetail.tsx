@@ -18,6 +18,10 @@ import {
   useExperiment,
 } from "@/context/experiment-context";
 import { ADMIN_RESET_QUANTITY } from "@/lib/experiment";
+import {
+  bumpAccordionInteraction,
+  createEmptyInteractionCounts,
+} from "@/lib/productInteractions";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -48,8 +52,11 @@ export function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  const interactionCountsRef = useRef(createEmptyInteractionCounts());
+
   useEffect(() => {
     setIsFavorite(false);
+    interactionCountsRef.current = createEmptyInteractionCounts();
   }, [conditionIndex]);
 
   const selectionsRef = useRef({
@@ -72,6 +79,9 @@ export function ProductDetail() {
       resetExperimentRef.current();
       return;
     }
+    if (action === "add_to_cart") {
+      interactionCountsRef.current.tap_add_to_cart++;
+    }
     finishedRef.current = true;
     const { size: sz, quantity: q, color: c } = selectionsRef.current;
     completePatternRef.current({
@@ -84,6 +94,7 @@ export function ProductDetail() {
       selectedSize: sz,
       selectedColor: c,
       quantity: q,
+      interactionCounts: { ...interactionCountsRef.current },
     });
   }, []);
 
@@ -141,7 +152,11 @@ export function ProductDetail() {
         <QuantitySelector
           label={m.quantity}
           value={quantity}
-          onChange={setQuantity}
+          onChange={(n) => {
+            if (n > quantity) interactionCountsRef.current.quantity_plus++;
+            if (n < quantity) interactionCountsRef.current.quantity_minus++;
+            setQuantity(n);
+          }}
         />
 
         <div className="space-y-3 pt-2">
@@ -167,7 +182,10 @@ export function ProductDetail() {
               ? "border-rose-300 bg-white text-rose-700"
               : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100"
           )}
-          onClick={() => setIsFavorite((v) => !v)}
+          onClick={() => {
+            interactionCountsRef.current.favorite_toggle++;
+            setIsFavorite((v) => !v);
+          }}
         >
           <Heart
             className={cn(
@@ -186,7 +204,12 @@ export function ProductDetail() {
           </p>
         </div>
 
-        <SectionAccordion items={accordionItems} />
+        <SectionAccordion
+          items={accordionItems}
+          onSectionInteract={(id) =>
+            bumpAccordionInteraction(interactionCountsRef.current, id)
+          }
+        />
       </div>
     </div>
   );

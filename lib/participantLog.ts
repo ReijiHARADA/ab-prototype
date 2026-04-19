@@ -44,6 +44,7 @@ export function buildParticipantSessionLog(
     quantity: log.quantity,
     startedAt: log.startedAt,
     endedAt: log.endedAt,
+    interactionCounts: log.interactionCounts,
   }));
 
   return {
@@ -53,9 +54,6 @@ export function buildParticipantSessionLog(
     sheetTab: languageToSheetTab(lang),
     sequencePattern: first.sequencePattern,
     experimentStartedAt: experimentStartedAt ?? undefined,
-    ageGroup: u.ageGroup,
-    gender: u.gender,
-    region: u.region,
     designTagsJoined: u.designTags.join("、"),
     height: u.height,
     weight: u.weight,

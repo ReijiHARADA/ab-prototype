@@ -121,6 +121,17 @@ function appendParticipantSession(body) {
 /**
  * アプリの CSV（participantSessionsToCsv）と同じ列順の 1 行配列を作る
  */
+var INTERACTION_KEYS = [
+  "accordion_about",
+  "accordion_detail",
+  "accordion_spec",
+  "accordion_care",
+  "favorite_toggle",
+  "quantity_plus",
+  "quantity_minus",
+  "tap_add_to_cart",
+];
+
 function buildParticipantRow(body) {
   var row = [
     body.sessionId,
@@ -128,9 +139,6 @@ function buildParticipantRow(body) {
     body.sheetTab,
     body.sequencePattern,
     body.experimentStartedAt || "",
-    body.ageGroup,
-    body.gender,
-    body.region,
     body.designTagsJoined,
     body.height,
     body.weight,
@@ -142,7 +150,9 @@ function buildParticipantRow(body) {
   for (var r = 0; r < 3; r++) {
     var round = rounds[r];
     if (!round) {
-      for (var i = 0; i < 9; i++) row.push("");
+      for (var i = 0; i < 9 + INTERACTION_KEYS.length; i++) {
+        row.push("");
+      }
       continue;
     }
     row.push(
@@ -156,6 +166,11 @@ function buildParticipantRow(body) {
       round.startedAt,
       round.endedAt
     );
+    var ic = round.interactionCounts || {};
+    for (var j = 0; j < INTERACTION_KEYS.length; j++) {
+      var key = INTERACTION_KEYS[j];
+      row.push(ic[key] != null ? ic[key] : 0);
+    }
   }
 
   return row;

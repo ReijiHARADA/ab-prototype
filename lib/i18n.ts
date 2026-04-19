@@ -32,6 +32,7 @@ const ja = {
   surveyPromptTitle: "Googleフォーム",
   surveyPromptBody:
     "続けるには、Google formのアンケートに回答してください。",
+  surveyPromptCheckboxLabel: "Googleフォームに回答しました",
   surveyPromptCta: "次の画面へ",
   productHeroCarouselAria: "商品画像（横にスワイプ）",
   productCarouselDotAria: (n: number, total: number) =>
@@ -164,6 +165,7 @@ const ko = {
   surveyPromptTitle: "Google Form",
   surveyPromptBody:
     "계속하려면 Google Form 설문에 응답해 주세요.",
+  surveyPromptCheckboxLabel: "Google 폼에 응답했습니다",
   surveyPromptCta: "다음 화면으로",
   productHeroCarouselAria: "상품 이미지(가로로 스와이프)",
   productCarouselDotAria: (n: number, total: number) =>

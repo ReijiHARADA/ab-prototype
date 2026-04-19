@@ -30,6 +30,7 @@ import type {
   Language,
   PatternAction,
   PatternLog,
+  ProductInteractionCounts,
   SequencePatternId,
   UserInfo,
 } from "@/types/experiment";
@@ -80,9 +81,6 @@ function newSessionId(): string {
 function userInfoForLog(u: UserInfo, lang: Language): PatternLog["userInfo"] {
   const m = getMessages(lang);
   return {
-    ageGroup: m.ages[u.ageGroup],
-    gender: m.genders[u.gender],
-    region: m.regions[u.region],
     designTags: u.designTags.map((t) => m.designTags[t]),
     height: u.heightCm,
     weight: u.weightKg,
@@ -122,6 +120,7 @@ interface ExperimentContextValue {
     selectedSize: string;
     selectedColor: string;
     quantity: number;
+    interactionCounts: ProductInteractionCounts;
   }) => void;
   resetExperiment: () => void;
 }
@@ -320,6 +319,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       selectedSize: string;
       selectedColor: string;
       quantity: number;
+      interactionCounts: ProductInteractionCounts;
     }) => {
       if (!language || !userInfo || !experimentStartedAt) return;
       if (sequencePattern == null) return;
@@ -337,6 +337,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         conditionId: currentConditionId,
         socialProofText,
         userInfo: userInfoForLog(userInfo, language),
+        interactionCounts: args.interactionCounts,
         productId: "waffle-henley-shirt",
         action: args.action,
         actionDetail: args.actionDetail,
