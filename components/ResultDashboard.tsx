@@ -81,8 +81,8 @@ export function ResultDashboard() {
         <h1 className="text-lg font-medium">{m.resultTitle}</h1>
         <p className="text-xs text-neutral-600">
           {lang === "ja"
-            ? "CSV は1参加者1行です（3条件分を横に展開）。spreadsheetTarget で記録先を分けられます。"
-            : "CSV는 참가자 1명당 1행입니다(3개 조건을 가로로 펼침). spreadsheetTarget으로 기록 시트를 구분합니다."}
+            ? "CSV は1参加者1行です（3条件分を横に展開）。sheetTab（jp / kr）で記録先シートを分けられます。"
+            : "CSV는 참가자 1명당 1행입니다(3개 조건을 가로로 펼침). sheetTab(jp/kr)으로 기록 시트를 구분합니다."}
         </p>
         <Button
           type="button"

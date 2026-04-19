@@ -1,5 +1,8 @@
 export type Language = "ja" | "ko";
 
+/** スプレッドシートのタブ名（言語選択に対応）。GAS は `getSheetByName` で使用 */
+export type SpreadsheetSheetTab = "jp" | "kr";
+
 export type AgeGroup =
   | "10s"
   | "20s"
@@ -67,8 +70,8 @@ export interface ParticipantSessionLog {
   type: "participantSession";
   sessionId: string;
   language: Language;
-  /** 記録先シートの切り替え用（`ja` = 日本語用、`ko` = 韓国語用）。GAS で gid / シート名を切り替える */
-  spreadsheetTarget: Language;
+  /** 記録先タブ名。日本語 UI → `jp`、韓国語 UI → `kr`（スプレッドシートで同名のシートを用意） */
+  sheetTab: SpreadsheetSheetTab;
   sequencePattern: SequencePatternId;
   experimentStartedAt?: string;
   ageGroup: string;

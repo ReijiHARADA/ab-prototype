@@ -1,7 +1,14 @@
 import type {
+  Language,
   ParticipantSessionLog,
   PatternLog,
+  SpreadsheetSheetTab,
 } from "@/types/experiment";
+
+/** 初回の言語選択に対応するスプレッドシートのタブ名（`jp` / `kr`） */
+export function languageToSheetTab(lang: Language): SpreadsheetSheetTab {
+  return lang === "ko" ? "kr" : "jp";
+}
 
 const EXPECTED_ROUNDS = 3;
 
@@ -43,7 +50,7 @@ export function buildParticipantSessionLog(
     type: "participantSession",
     sessionId: sid,
     language: lang,
-    spreadsheetTarget: lang,
+    sheetTab: languageToSheetTab(lang),
     sequencePattern: first.sequencePattern,
     experimentStartedAt: experimentStartedAt ?? undefined,
     ageGroup: u.ageGroup,

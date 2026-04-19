@@ -14,7 +14,9 @@ flowchart LR
   D --> E[スプレッドシート appendRow]
 ```
 
-アプリが送る JSON の形は **`lib/logger.ts`** で固定です。列の並びと一致させるのは **Google Apps Script（GAS）** 側です（[`google-apps-script.md`](./google-apps-script.md) のサンプル）。
+アプリが送る JSON の形は **`lib/logger.ts`** で固定です。列の並びと一致させるのは **Google Apps Script（GAS）** 側です。
+
+**現在の本番ログ**は完了時に **1参加者1行** の `participantSession` です。言語は **`sheetTab`** で渡されます（日本語 UI → **`jp`**、韓国語 UI → **`kr`**）。スプレッドシートに **同名のシート（タブ）**を用意し、GAS で `getSheetByName("jp")` / `getSheetByName("kr")` に書き分けてください。詳細は [`google-apps-script-participant-session.md`](./google-apps-script-participant-session.md) を参照。
 
 ---
 

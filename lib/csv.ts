@@ -64,7 +64,7 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
   const headers = [
     "sessionId",
     "language",
-    "spreadsheetTarget",
+    "sheetTab",
     "sequencePattern",
     "experimentStartedAt",
     "ageGroup",
@@ -84,7 +84,7 @@ export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string 
     const row: string[] = [
       p.sessionId,
       p.language,
-      p.spreadsheetTarget,
+      p.sheetTab,
       String(p.sequencePattern),
       p.experimentStartedAt ?? "",
       p.ageGroup,
