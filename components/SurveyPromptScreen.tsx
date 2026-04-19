@@ -52,46 +52,57 @@ export function SurveyPromptScreen() {
           {isLastSurvey ? m.surveyPromptLastBody : m.surveyPromptBody}
         </p>
       </div>
-      {!isLastSurvey && (
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id={SURVEY_CONFIRMED_ID}
-            checked={confirmed}
-            onCheckedChange={(checked) => setConfirmed(checked === true)}
-            className="mt-0.5"
-          />
-          <Label
-            htmlFor={SURVEY_CONFIRMED_ID}
-            className="cursor-pointer text-left text-sm font-normal leading-snug text-neutral-800"
+      {isLastSurvey ? (
+        saving ? (
+          <div
+            className="flex flex-col items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-8"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
           >
-            {m.surveyPromptCheckboxLabel}
-          </Label>
-        </div>
-      )}
-      {isLastSurvey && saving ? (
-        <div
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-8"
-          role="status"
-          aria-live="polite"
-          aria-busy="true"
-        >
-          <Loader2
-            className="size-8 animate-spin text-neutral-600"
-            aria-hidden
-          />
-          <p className="text-sm font-medium text-neutral-800">
-            {m.surveyPromptSaving}
-          </p>
-        </div>
+            <Loader2
+              className="size-8 animate-spin text-neutral-600"
+              aria-hidden
+            />
+            <p className="text-sm font-medium text-neutral-800">
+              {m.surveyPromptSaving}
+            </p>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            className="h-12 w-full rounded-md text-base"
+            disabled={saving}
+            onClick={() => void handleAdvance()}
+          >
+            {m.surveyPromptLastCta}
+          </Button>
+        )
       ) : (
-        <Button
-          type="button"
-          className="h-12 w-full rounded-md text-base"
-          disabled={saving || (!isLastSurvey && !confirmed)}
-          onClick={() => void handleAdvance()}
-        >
-          {isLastSurvey ? m.surveyPromptLastCta : m.surveyPromptCta}
-        </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id={SURVEY_CONFIRMED_ID}
+              checked={confirmed}
+              onCheckedChange={(checked) => setConfirmed(checked === true)}
+              className="mt-0.5"
+            />
+            <Label
+              htmlFor={SURVEY_CONFIRMED_ID}
+              className="cursor-pointer text-left text-sm font-normal leading-snug text-neutral-800"
+            >
+              {m.surveyPromptCheckboxLabel}
+            </Label>
+          </div>
+          <Button
+            type="button"
+            className="h-12 w-full rounded-md text-base"
+            disabled={!confirmed}
+            onClick={() => void handleAdvance()}
+          >
+            {m.surveyPromptCta}
+          </Button>
+        </div>
       )}
     </div>
   );
