@@ -64,24 +64,27 @@ const ROUND_FIELD_KEYS = [
   "endedAt",
 ] as const;
 
+/** スプレッドシート1行目・CSV1行目と同じ列名（`participantSessionsToCsv` と GAS で共有） */
+export const PARTICIPANT_SESSION_CSV_HEADERS: string[] = [
+  "sessionId",
+  "language",
+  "sheetTab",
+  "sequencePattern",
+  "experimentStartedAt",
+  "designTags",
+  "height",
+  "weight",
+  "bmi",
+  "bodyType",
+  ...[0, 1, 2].flatMap((r) => [
+    ...ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`),
+    ...INTERACTION_COUNT_KEYS.map((k) => `round${r}_${k}`),
+  ]),
+];
+
 /** 1参加者1行（3条件分を横に展開）。Excel 取り込み用。 */
 export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string {
-  const headers = [
-    "sessionId",
-    "language",
-    "sheetTab",
-    "sequencePattern",
-    "experimentStartedAt",
-    "designTags",
-    "height",
-    "weight",
-    "bmi",
-    "bodyType",
-    ...[0, 1, 2].flatMap((r) => [
-      ...ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`),
-      ...INTERACTION_COUNT_KEYS.map((k) => `round${r}_${k}`),
-    ]),
-  ];
+  const headers = PARTICIPANT_SESSION_CSV_HEADERS;
   const lines = [headers.join(",")];
   for (const p of logs) {
     const row: string[] = [

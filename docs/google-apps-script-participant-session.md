@@ -20,6 +20,15 @@
 
 ※ 左から何番目かは不問。**タブ名が正確に `jp` と `kr`** であることが必要です。
 
+**行の意味（下の GAS 例どおり）**
+
+| 行 | 内容 |
+|----|------|
+| **1 行目** | 列ヘッダ（`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` と同じ順） |
+| **2 行目以降** | 参加者データ（`appendRow` で 1 行ずつ追加） |
+
+シートが空のときは、下記スクリプトが **初回の追記前に 1 行目へヘッダを自動で書き込み**ます。手動で 1 行目にヘッダを入れても構いません（その場合は `getLastRow() >= 1` のため、ヘッダの二重追加はされません）。
+
 ---
 
 ## GAS に届くデータ（POST の中身）
@@ -67,7 +76,8 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 **やることは次の 2 点だけです。**
 
 1. `body.sheetTab` が `"jp"` ならシート `jp`、`"kr"` ならシート `kr` を `getSheetByName` で取得する。  
-2. そのシートに `appendRow` で **1 行分の配列**を書く（列順は下の例か、`lib/csv.ts` の `participantSessionsToCsv` と揃える）。
+2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目にヘッダ行**を書く（`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` と同じ順）。  
+3. そのあと `appendRow` で **データ行**を追加する（列順は `buildParticipantRow`／`participantSessionsToCsv` と揃える）。
 
 ```javascript
 /**
@@ -104,22 +114,7 @@ function doPost(e) {
 }
 
 /**
- * sheetTab に応じて jp / kr シートを選び、1 行追加する
- */
-function appendParticipantSession(body) {
-  var tabName = body.sheetTab === "kr" ? "kr" : "jp";
-  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(tabName);
-  if (!sheet) {
-    throw new Error("シートが見つかりません: " + tabName + "（タブ名を jp / kr にしてください）");
-  }
-
-  var row = buildParticipantRow(body);
-  sheet.appendRow(row);
-}
-
-/**
- * アプリの CSV（participantSessionsToCsv）と同じ列順の 1 行配列を作る
+ * 1 条件あたりの操作回数キー（lib/productInteractions.ts の INTERACTION_COUNT_KEYS と同じ順）
  */
 var INTERACTION_KEYS = [
   "accordion_about",
@@ -131,6 +126,73 @@ var INTERACTION_KEYS = [
   "quantity_minus",
   "tap_add_to_cart",
 ];
+
+/**
+ * 列ヘッダ 1 行分（lib/csv.ts の PARTICIPANT_SESSION_CSV_HEADERS と同じ順を生成）
+ */
+function buildParticipantSessionHeaders() {
+  var headers = [
+    "sessionId",
+    "language",
+    "sheetTab",
+    "sequencePattern",
+    "experimentStartedAt",
+    "designTags",
+    "height",
+    "weight",
+    "bmi",
+    "bodyType",
+  ];
+  var roundFields = [
+    "conditionId",
+    "socialProofText",
+    "action",
+    "durationSec",
+    "selectedSize",
+    "selectedColor",
+    "quantity",
+    "startedAt",
+    "endedAt",
+  ];
+  for (var r = 0; r < 3; r++) {
+    for (var i = 0; i < roundFields.length; i++) {
+      headers.push("round" + r + "_" + roundFields[i]);
+    }
+    for (var j = 0; j < INTERACTION_KEYS.length; j++) {
+      headers.push("round" + r + "_" + INTERACTION_KEYS[j]);
+    }
+  }
+  return headers;
+}
+
+/**
+ * シートが空のときだけ 1 行目にヘッダを書く（既に行がある場合は何もしない）
+ */
+function ensureParticipantSessionHeaderRow(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(buildParticipantSessionHeaders());
+  }
+}
+
+/**
+ * sheetTab に応じて jp / kr シートを選び、ヘッダ（初回のみ）＋データ 1 行を追加する
+ */
+function appendParticipantSession(body) {
+  var tabName = body.sheetTab === "kr" ? "kr" : "jp";
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(tabName);
+  if (!sheet) {
+    throw new Error("シートが見つかりません: " + tabName + "（タブ名を jp / kr にしてください）");
+  }
+
+  ensureParticipantSessionHeaderRow(sheet);
+  var row = buildParticipantRow(body);
+  sheet.appendRow(row);
+}
+
+/**
+ * アプリの CSV（participantSessionsToCsv）と同じ列順の 1 行配列を作る
+ */
 
 function buildParticipantRow(body) {
   var row = [
@@ -191,12 +253,8 @@ function jsonResponse(obj) {
 | 2 | `body.type === "participantSession"` なら記録処理へ |
 | 3 | `body.sheetTab` を見る。`"kr"` ならシート名 **`kr`**、それ以外（通常は `"jp"`）なら **`jp`** |
 | 4 | `SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(tabName)` でシート取得 |
-| 5 | `appendRow(列の配列)` で 1 行追加 |
-
-### ヘッダ行を自動で入れたい場合
-
-最初の 1 行目の列名を、`lib/csv.ts` の `participantSessionsToCsv` のヘッダと同じ順に並べ、`sheet.getLastRow() === 0` のときだけ `appendRow(headers)` する、といった処理を `appendParticipantSession` の前に足せます。  
-`buildParticipantRow` の先頭に `new Date()` を入れている場合は、ヘッダの 1 列目を `received_at_UTC` などに合わせてください。
+| 5 | **`getLastRow() === 0` なら** `buildParticipantSessionHeaders()` を `appendRow` し、**1 行目をヘッダにする** |
+| 6 | `buildParticipantRow(body)` を `appendRow` し、**2 行目以降にデータを追加** |
 
 ---
 
@@ -205,4 +263,4 @@ function jsonResponse(obj) {
 1. Vercel の **`LOG_ENDPOINT`** に、この GAS の **ウェブアプリ URL**（`/exec` で終わるもの）を設定する。  
 2. アプリで実験を最後まで完了し、`jp` または `kr` を開いて行が増えているか確認する。
 
-列定義は **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。
+列定義は **`lib/csv.ts` の `PARTICIPANT_SESSION_CSV_HEADERS` / `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。
