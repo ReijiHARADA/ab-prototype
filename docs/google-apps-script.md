@@ -35,21 +35,20 @@
 | G | social_proof_text | 表示したソーシャルプルーフ文言 / 노출 문구 |
 | H | pattern_action | `timeout` \| `back` \| `add_to_cart`（pattern のみ） |
 | I | action_detail | 補足（例: view_cart_clicked） |
-| J | duration_sec | 滞在秒 / 체류(초) |
-| K | duration_ms | 滞在ミリ秒 / 체류(ms) |
-| L | selected_size | 選択サイズ / 선택 사이즈 |
-| M | selected_color | 選択カラー / 선택 컬러 |
-| N | quantity | 数量 / 수량 |
-| O | pattern_started_at | パターン開始（ISO） / 패턴 시작 |
-| P | pattern_ended_at | パターン終了（ISO） / 패턴 종료 |
-| Q | user_info_json | 回答者属性の JSON / 응답자 속성 JSON |
-| R | product_id | 固定商品 ID / 상품 ID |
-| S | event_name | 補助イベント名（event のみ） |
-| T | event_value | 補助イベント値（event のみ） |
-| U | event_client_time | クライアント発生時刻 ISO（event のみ） |
+| J | duration_ms | 滞在ミリ秒 / 체류(ms) |
+| K | selected_size | 選択サイズ / 선택 사이즈 |
+| L | selected_color | 選択カラー / 선택 컬러 |
+| M | quantity | 数量 / 수량 |
+| N | pattern_started_at | パターン開始（ISO） / 패턴 시작 |
+| O | pattern_ended_at | パターン終了（ISO） / 패턴 종료 |
+| P | user_info_json | 回答者属性の JSON / 응답자 속성 JSON |
+| Q | product_id | 固定商品 ID / 상품 ID |
+| R | event_name | 補助イベント名（event のみ） |
+| S | event_value | 補助イベント値（event のみ） |
+| T | event_client_time | クライアント発生時刻 ISO（event のみ） |
 
-- **pattern** 行: `S`〜`U` は空にします。  
-- **event** 行: `E`〜`R` のうち該当しないものは空にします。
+- **pattern** 行: `R`〜`T` は空にします。  
+- **event** 行: `E`〜`Q` のうち該当しないものは空にします。
 
 ## Google Apps Script（コピペ用）
 
@@ -62,7 +61,7 @@ var SPREADSHEET_ID = "1Cr2w3GpVxiqoK9ILBVQ_-6_TdjRnjfQBTHNYWCW4bpk";
 /** ブラウザ URL の gid= の数値＝シート ID */
 var SHEET_GID = 1471844174;
 
-var NUM_COLS = 21;
+var NUM_COLS = 20;
 
 var HEADERS_EN = [
   "received_at_UTC",
@@ -74,7 +73,6 @@ var HEADERS_EN = [
   "social_proof_text",
   "pattern_action",
   "action_detail",
-  "duration_sec",
   "duration_ms",
   "selected_size",
   "selected_color",
@@ -99,7 +97,6 @@ var HEADERS_I18N = [
   "表示文言 / 노출 문구",
   "timeout|back|add_to_cart",
   "詳細 / 상세",
-  "滞在(秒) / 체류(초)",
   "滞在(ms) / 체류(ms)",
   "size / 사이즈",
   "color / 컬러",
@@ -150,7 +147,6 @@ function doPost(e) {
         data.socialProofText || "",
         data.action || "",
         data.actionDetail || "",
-        data.durationSec != null ? data.durationSec : "",
         data.durationMs != null ? data.durationMs : "",
         data.selectedSize || "",
         data.selectedColor || "",
@@ -171,7 +167,6 @@ function doPost(e) {
         data.language || "",
         "",
         data.conditionId || "",
-        "",
         "",
         "",
         "",

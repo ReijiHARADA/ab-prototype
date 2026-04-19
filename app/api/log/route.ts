@@ -20,6 +20,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "invalid json" }, { status: 400 });
   }
 
+  if (
+    body &&
+    typeof body === "object" &&
+    (body as { type?: string }).type === "participantSession"
+  ) {
+    const p = body as { language?: string; sheetTab?: string };
+    p.sheetTab = p.language === "ko" ? "kr" : "jp";
+  }
+
   try {
     const res = await fetch(gasUrl, {
       method: "POST",

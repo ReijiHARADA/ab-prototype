@@ -8,15 +8,16 @@ export const ROUND_FIELD_KEYS = [
   "conditionId",
   "socialProofText",
   "action",
-  "durationSec",
+  "durationMs",
   "selectedSize",
   "quantity",
   "startedAt",
   "endedAt",
 ] as const;
 
-/** 列順は `lib/csv.ts` のデータ行と同一（英語キー名） */
+/** 1行目: 英語キー。`serial` は通し番号（スプシ・CSV の列 A） */
 export const PARTICIPANT_SESSION_COLUMN_KEYS: string[] = [
+  "serial",
   "sessionId",
   "language",
   "sheetTab",
@@ -32,6 +33,11 @@ export const PARTICIPANT_SESSION_COLUMN_KEYS: string[] = [
     ...INTERACTION_COUNT_KEYS.map((k) => `${cid}_${k}`),
   ]),
 ];
+
+const SERIAL_LABEL: Record<"ja" | "ko", string> = {
+  ja: "通し番号",
+  ko: "연번",
+};
 
 const BASE_LABELS: Record<
   | "sessionId"
@@ -68,7 +74,7 @@ const ROUND_FIELD_LABELS: Record<
     ko: "소셜 프루프 문구",
   },
   action: { ja: "アクション", ko: "액션" },
-  durationSec: { ja: "滞在秒", ko: "체류(초)" },
+  durationMs: { ja: "滞在ミリ秒", ko: "체류(ms)" },
   selectedSize: { ja: "選択サイズ", ko: "선택 사이즈" },
   quantity: { ja: "数量", ko: "수량" },
   startedAt: { ja: "開始日時", ko: "시작 시각" },
@@ -97,9 +103,13 @@ const CONDITION_BLOCK_LABELS: Record<ConditionId, { ja: string; ko: string }> =
     body_type: { ja: "体型", ko: "체형" },
   };
 
+/** スプレッドシート・CSV の 1 行目（英語キー列） */
+export function getParticipantSessionCsvHeadersEnglish(): string[] {
+  return [...PARTICIPANT_SESSION_COLUMN_KEYS];
+}
+
 /**
- * スプレッドシート1行目・CSV1行目用の表示列名。
- * `jp` シート → 日本語、`kr` シート → 韓国語。
+ * スプレッドシート・CSV の 2 行目（`jp`＝日本語、`kr`＝韓国語の見出し）
  */
 export function getParticipantSessionCsvHeaders(lang: Language): string[] {
   const L = lang === "ko" ? "ko" : "ja";
@@ -118,17 +128,18 @@ export function getParticipantSessionCsvHeaders(lang: Language): string[] {
     ] as const
   ).map((k) => BASE_LABELS[k][L]);
 
+  const conditionHeaders: string[] = [];
   for (const conditionId of CANONICAL_CONDITION_ORDER) {
     const block = CONDITION_BLOCK_LABELS[conditionId][L];
     for (const k of ROUND_FIELD_KEYS) {
-      base.push(`${block}_${ROUND_FIELD_LABELS[k][L]}`);
+      conditionHeaders.push(`${block}_${ROUND_FIELD_LABELS[k][L]}`);
     }
     for (const k of INTERACTION_COUNT_KEYS) {
-      base.push(`${block}_${INTERACTION_LABELS[k][L]}`);
+      conditionHeaders.push(`${block}_${INTERACTION_LABELS[k][L]}`);
     }
   }
 
-  return base;
+  return [SERIAL_LABEL[L], ...base, ...conditionHeaders];
 }
 
 /** GAS やドキュメント用: シート名からヘッダ言語を決める */

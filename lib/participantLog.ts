@@ -37,7 +37,6 @@ export function buildParticipantSessionLog(
     conditionId: log.conditionId,
     socialProofText: log.socialProofText,
     action: log.action,
-    durationSec: log.durationSec,
     durationMs: log.durationMs,
     selectedSize: log.selectedSize,
     quantity: log.quantity,

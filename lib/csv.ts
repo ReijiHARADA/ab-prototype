@@ -4,6 +4,7 @@ import { CANONICAL_CONDITION_ORDER } from "@/lib/experiment";
 import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
 import {
   getParticipantSessionCsvHeaders,
+  getParticipantSessionCsvHeadersEnglish,
   PARTICIPANT_SESSION_COLUMN_KEYS,
   ROUND_FIELD_KEYS,
 } from "@/lib/participantSessionHeaders";
@@ -25,7 +26,7 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
     "socialProofText",
     "action",
     "actionDetail",
-    "durationSec",
+    "durationMs",
     "selectedSize",
     "quantity",
     "startedAt",
@@ -44,7 +45,7 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
       log.socialProofText,
       log.action,
       log.actionDetail ?? "",
-      String(log.durationSec),
+      String(log.durationMs),
       log.selectedSize,
       String(log.quantity),
       log.startedAt,
@@ -60,9 +61,13 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
 export const PARTICIPANT_SESSION_CSV_HEADERS: string[] =
   PARTICIPANT_SESSION_COLUMN_KEYS;
 
-export { getParticipantSessionCsvHeaders, PARTICIPANT_SESSION_COLUMN_KEYS };
+export {
+  getParticipantSessionCsvHeaders,
+  getParticipantSessionCsvHeadersEnglish,
+  PARTICIPANT_SESSION_COLUMN_KEYS,
+};
 
-/** 1参加者1行（3条件分を横に展開）。Excel 取り込み用。1行目は `headerLanguage`（未指定時は先頭の `logs[].language`）。 */
+/** 1参加者1行（3条件分を横に展開）。1行目=英語キー、2行目=言語別見出し、3行目以降=データ。`headerLanguage` 未指定時は先頭の `logs[].language`。 */
 export function participantSessionsToCsv(
   logs: ParticipantSessionLog[],
   headerLanguage?: Language
@@ -70,10 +75,18 @@ export function participantSessionsToCsv(
   const lang =
     headerLanguage ??
     (logs[0]?.language === "ko" ? "ko" : "ja");
-  const headers = getParticipantSessionCsvHeaders(lang);
-  const lines = [headers.map((h) => escapeCsvCell(h)).join(",")];
-  for (const p of logs) {
+  const lines = [
+    getParticipantSessionCsvHeadersEnglish()
+      .map((h) => escapeCsvCell(h))
+      .join(","),
+    getParticipantSessionCsvHeaders(lang)
+      .map((h) => escapeCsvCell(h))
+      .join(","),
+  ];
+  for (let idx = 0; idx < logs.length; idx++) {
+    const p = logs[idx];
     const row: string[] = [
+      String(idx + 1),
       p.sessionId,
       p.language,
       p.sheetTab,
@@ -96,7 +109,7 @@ export function participantSessionsToCsv(
         round.conditionId,
         round.socialProofText,
         round.action,
-        String(round.durationSec),
+        String(round.durationMs),
         round.selectedSize,
         String(round.quantity),
         round.startedAt,

@@ -80,7 +80,7 @@ npm run build
 - `conditionId`: `sales_volume` など 8 種
 - `socialProofText`: 画面上に出した文言
 - `action`: `timeout` | `back` | `add_to_cart`
-- `durationSec`: 滞在時間（秒）
+- `durationMs`: 滞在時間（ミリ秒）
 - `selectedSize`, `quantity`
 
 ### EventLog（任意）

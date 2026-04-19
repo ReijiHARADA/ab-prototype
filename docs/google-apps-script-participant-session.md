@@ -24,10 +24,11 @@
 
 | 行 | 内容 |
 |----|------|
-| **1 行目** | 列ヘッダ（**`jp` シートは日本語、`kr` シートは韓国語**。条件ブロックは**常に「何もなし → デザインの好み → 体型」**の順。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と同じ順・同じ文言） |
-| **2 行目以降** | 参加者データ（`appendRow` で 1 行ずつ追加） |
+| **1 行目** | **英語キー**（`serial`, `sessionId`, … — `lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeadersEnglish` と同じ順） |
+| **2 行目** | **`jp` シートは日本語、`kr` シートは韓国語**の見出し（`getParticipantSessionCsvHeaders` と同じ順・文言） |
+| **3 行目以降** | 参加者データ（**A 列は通し番号** `serial`、GAS が自動採番） |
 
-シートが空のときは、下記スクリプトが **初回の追記前に 1 行目へヘッダを自動で書き込み**ます。手動で 1 行目にヘッダを入れても構いません（その場合は `getLastRow() >= 1` のため、ヘッダの二重追加はされません）。
+シートが空のときは、下記スクリプトが **1〜2 行目に英語ヘッダ→言語ヘッダ**を書き込みます。既に行がある場合はヘッダを追加しません（`getLastRow() === 0` のときのみ）。
 
 ---
 
@@ -57,7 +58,6 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
       "conditionId": "none",
       "socialProofText": "",
       "action": "add_to_cart",
-      "durationSec": 12,
       "durationMs": 12000,
       "selectedSize": "M",
       "quantity": 1,
@@ -70,13 +70,13 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 
 ---
 
-## `doPost` で `sheetTab` によりシートを切り替える（具体例）
+## `doPost` で `language` によりシートを切り替える（具体例）
 
-**やることは次の 2 点だけです。**
+**ポイント**
 
-1. `body.sheetTab` が `"jp"` ならシート `jp`、`"kr"` ならシート `kr` を `getSheetByName` で取得する。  
-2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目にヘッダ行**を書く（**タブが `jp` なら日本語列名、`kr` なら韓国語列名**。`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と一致させる）。  
-3. そのあと `appendRow` で **データ行**を追加する。各条件の列は **常に `none` → `design_preference` → `body_type`** の順（`rounds` の訪問順ではなく `conditionId` で対応付け）。`selectedColor` は含めない。
+1. **記録先タブ**は **`body.language` を正**とする（`"ko"` → シート `kr`、それ以外 → `jp`）。`sheetTab` と食い違う場合は **`language` 優先**（Next.js の `/api/log` でも同様に上書き可）。  
+2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目＝英語キー**、**2 行目＝`jp` なら日本語 / `kr` なら韓国語**のヘッダを書く（`lib/participantSessionHeaders.ts` と一致）。  
+3. `appendRow` で **データ行**を追加する。**A 列（`serial`）は** `getLastRow() - 2` から算出した **通し番号**。各条件の列は **常に `none` → `design_preference` → `body_type`** の順。
 
 ```javascript
 /**
@@ -131,14 +131,63 @@ var INTERACTION_KEYS = [
  */
 var CANONICAL_CONDITION_ORDER = ["none", "design_preference", "body_type"];
 
+/** ヘッダ行数（1 行目=英語、2 行目=言語別） */
+var HEADER_ROWS = 2;
+
 /**
- * 列ヘッダ 1 行分。tabName が "kr" のとき韓国語、それ以外は日本語。
- * 条件ブロックは「何もなし → デザインの好み → 体型」（表示パターンの訪問順ではない）。
+ * 記録先シート名。body.language を正とする（"ko" → kr、それ以外 → jp）
+ */
+function getSheetTabName(body) {
+  return body.language === "ko" ? "kr" : "jp";
+}
+
+/**
+ * 1 行目: 英語キー（lib/participantSessionHeaders.ts の PARTICIPANT_SESSION_COLUMN_KEYS と同じ順）
+ */
+function buildParticipantSessionHeadersEnglish() {
+  var headers = [
+    "serial",
+    "sessionId",
+    "language",
+    "sheetTab",
+    "sequencePattern",
+    "experimentStartedAt",
+    "designTags",
+    "height",
+    "weight",
+    "bmi",
+    "bodyType",
+  ];
+  var roundFields = [
+    "conditionId",
+    "socialProofText",
+    "action",
+    "durationMs",
+    "selectedSize",
+    "quantity",
+    "startedAt",
+    "endedAt",
+  ];
+  for (var r = 0; r < CANONICAL_CONDITION_ORDER.length; r++) {
+    var cid = CANONICAL_CONDITION_ORDER[r];
+    for (var i = 0; i < roundFields.length; i++) {
+      headers.push(cid + "_" + roundFields[i]);
+    }
+    for (var j = 0; j < INTERACTION_KEYS.length; j++) {
+      headers.push(cid + "_" + INTERACTION_KEYS[j]);
+    }
+  }
+  return headers;
+}
+
+/**
+ * 2 行目: tabName が "kr" なら韓国語、それ以外は日本語。
  * lib/participantSessionHeaders.ts の getParticipantSessionCsvHeaders と文言を揃えること。
  */
-function buildParticipantSessionHeadersForTab(tabName) {
+function buildParticipantSessionHeadersLocalized(tabName) {
   var isKo = tabName === "kr";
   var headers = [];
+  headers.push(isKo ? "연번" : "通し番号");
   if (!isKo) {
     headers.push(
       "セッションID",
@@ -174,7 +223,7 @@ function buildParticipantSessionHeadersForTab(tabName) {
     "条件ID",
     "ソーシャルプルーフ文言",
     "アクション",
-    "滞在秒",
+    "滞在ミリ秒",
     "選択サイズ",
     "数量",
     "開始日時",
@@ -184,7 +233,7 @@ function buildParticipantSessionHeadersForTab(tabName) {
     "조건 ID",
     "소셜 프루프 문구",
     "액션",
-    "체류(초)",
+    "체류(ms)",
     "선택 사이즈",
     "수량",
     "시작 시각",
@@ -226,28 +275,30 @@ function buildParticipantSessionHeadersForTab(tabName) {
 }
 
 /**
- * シートが空のときだけ 1 行目にヘッダを書く（jp=日本語 / kr=韓国語）
+ * シートが空のときだけ 1〜2 行目に英語ヘッダ→言語ヘッダを書く
  */
-function ensureParticipantSessionHeaderRow(sheet, tabName) {
+function ensureParticipantSessionHeaderRows(sheet, tabName) {
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(buildParticipantSessionHeadersForTab(tabName));
+    sheet.appendRow(buildParticipantSessionHeadersEnglish());
+    sheet.appendRow(buildParticipantSessionHeadersLocalized(tabName));
   }
 }
 
 /**
- * sheetTab に応じて jp / kr シートを選び、ヘッダ（初回のみ）＋データ 1 行を追加する
+ * language に応じて jp / kr シートを選び、ヘッダ（初回のみ）＋データ 1 行を追加する
  */
 function appendParticipantSession(body) {
-  var tabName = body.sheetTab === "kr" ? "kr" : "jp";
+  var tabName = getSheetTabName(body);
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(tabName);
   if (!sheet) {
     throw new Error("シートが見つかりません: " + tabName + "（タブ名を jp / kr にしてください）");
   }
 
-  ensureParticipantSessionHeaderRow(sheet, tabName);
-  var row = buildParticipantRow(body);
-  sheet.appendRow(row);
+  ensureParticipantSessionHeaderRows(sheet, tabName);
+  var serial = Math.max(0, sheet.getLastRow() - HEADER_ROWS) + 1;
+  var row = buildParticipantRow(body, tabName);
+  sheet.appendRow([serial].concat(row));
 }
 
 /**
@@ -263,11 +314,11 @@ function pickRoundByCondition(rounds, conditionId) {
   return null;
 }
 
-function buildParticipantRow(body) {
+function buildParticipantRow(body, tabName) {
   var row = [
     body.sessionId,
     body.language,
-    body.sheetTab,
+    tabName,
     body.sequencePattern,
     body.experimentStartedAt || "",
     body.designTagsJoined,
@@ -290,7 +341,7 @@ function buildParticipantRow(body) {
       round.conditionId,
       round.socialProofText,
       round.action,
-      round.durationSec,
+      round.durationMs != null ? round.durationMs : "",
       round.selectedSize,
       round.quantity,
       round.startedAt,
@@ -319,10 +370,10 @@ function jsonResponse(obj) {
 |------|------|
 | 1 | `e.postData.contents` を `JSON.parse` する |
 | 2 | `body.type === "participantSession"` なら記録処理へ |
-| 3 | `body.sheetTab` を見る。`"kr"` ならシート名 **`kr`**、それ以外（通常は `"jp"`）なら **`jp`** |
+| 3 | **`body.language === "ko"`** ならシート **`kr`**、**`"ja"`** なら **`jp`**（`getSheetTabName`） |
 | 4 | `SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(tabName)` でシート取得 |
-| 5 | **`getLastRow() === 0` なら** `buildParticipantSessionHeadersForTab(tabName)` を `appendRow` し、**1 行目をヘッダにする**（`jp`＝日本語、`kr`＝韓国語） |
-| 6 | `buildParticipantRow(body)` を `appendRow` し、**2 行目以降にデータを追加** |
+| 5 | **`getLastRow() === 0` なら** 1 行目に英語キー、2 行目に言語別ヘッダを `appendRow` |
+| 6 | 通し番号 `serial` を付け、`buildParticipantRow(body, tabName)` の結果の **先頭に `serial` を結合**して **3 行目以降**にデータを追加 |
 
 ---
 
@@ -331,4 +382,4 @@ function jsonResponse(obj) {
 1. Vercel の **`LOG_ENDPOINT`** に、この GAS の **ウェブアプリ URL**（`/exec` で終わるもの）を設定する。  
 2. アプリで実験を最後まで完了し、`jp` または `kr` を開いて行が増えているか確認する。
 
-表示列名は **`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders`**（`jp`/`kr` に対応）、データ列の並びは **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。
+**1 行目**は **`getParticipantSessionCsvHeadersEnglish`**、**2 行目**は **`getParticipantSessionCsvHeaders`**（`jp`/`kr` に対応）、データの並びは **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。

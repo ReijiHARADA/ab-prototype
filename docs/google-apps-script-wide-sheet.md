@@ -23,7 +23,7 @@
 
 1. 表示文言 ← `socialProofText`  
 2. アクション ← `action`  
-3. 滞在(秒) ← `durationSec`  
+3. 滞在(ms) ← `durationMs`  
 4. カート ← `add_to_cart` のとき `○`  
 5. 戻る ← `back` のとき `○`  
 6. タイムアウト ← `timeout` のとき `○`  
@@ -113,7 +113,7 @@ function doPost(e) {
     var start = 3 + blockIdx * SUBCOLS;
     row[start] = data.socialProofText || "";
     row[start + 1] = data.action || "";
-    row[start + 2] = data.durationSec != null ? data.durationSec : "";
+    row[start + 2] = data.durationMs != null ? data.durationMs : "";
     row[start + 3] = data.action === "add_to_cart" ? "\u25cb" : "";
     row[start + 4] = data.action === "back" ? "\u25cb" : "";
     row[start + 5] = data.action === "timeout" ? "\u25cb" : "";

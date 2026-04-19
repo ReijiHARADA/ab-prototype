@@ -97,7 +97,6 @@ export interface ParticipantSessionLog {
     conditionId: ConditionId;
     socialProofText: string;
     action: PatternAction;
-    durationSec: number;
     durationMs: number;
     selectedSize: string;
     quantity: number;
@@ -129,7 +128,6 @@ export interface PatternLog {
   startedAt: string;
   endedAt: string;
   durationMs: number;
-  durationSec: number;
   selectedSize: string;
   quantity: number;
 }

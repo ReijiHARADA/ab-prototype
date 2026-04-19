@@ -2,6 +2,8 @@
 
 import type { EventLog, ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
+import { languageToSheetTab } from "@/lib/participantLog";
+
 const PATTERN_KEY = "ab-pattern-logs-v1";
 const PARTICIPANT_KEY = "ab-participant-logs-v1";
 const EVENT_KEY = "ab-event-logs-v1";
@@ -120,9 +122,14 @@ export async function logPatternResult(log: PatternLog): Promise<void> {
 export async function logParticipantSession(
   log: ParticipantSessionLog
 ): Promise<void> {
-  const ok = await postPayload(log);
+  const payload: ParticipantSessionLog = {
+    ...log,
+    /** `language` を正とし、`sheetTab` を常に同期（jp/kr 取り違え防止） */
+    sheetTab: languageToSheetTab(log.language),
+  };
+  const ok = await postPayload(payload);
   if (!ok) {
-    saveLocalParticipantLog(log);
+    saveLocalParticipantLog(payload);
   }
 }
 

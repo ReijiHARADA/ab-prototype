@@ -342,7 +342,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         startedAt: startIso,
         endedAt: endedIso,
         durationMs,
-        durationSec: Math.round(durationMs / 1000),
         selectedSize: args.selectedSize,
         quantity: args.quantity,
       };
