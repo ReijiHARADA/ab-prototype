@@ -17,6 +17,7 @@ import {
   PATTERN_MS,
   useExperiment,
 } from "@/context/experiment-context";
+import { ADMIN_RESET_QUANTITY } from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export function ProductDetail() {
     socialProofSegments,
     currentConditionId,
     completePattern,
+    resetExperiment,
     patternStartedAt,
     conditionIndex,
   } = useExperiment();
@@ -34,6 +36,11 @@ export function ProductDetail() {
   useEffect(() => {
     completePatternRef.current = completePattern;
   }, [completePattern]);
+
+  const resetExperimentRef = useRef(resetExperiment);
+  useEffect(() => {
+    resetExperimentRef.current = resetExperiment;
+  }, [resetExperiment]);
 
   const lang = language ?? "ja";
   const m = getMessages(lang);
@@ -57,6 +64,14 @@ export function ProductDetail() {
   const finishedRef = useRef(false);
   const runFinish = useCallback((action: "timeout" | "back" | "add_to_cart") => {
     if (finishedRef.current) return;
+    if (
+      action === "add_to_cart" &&
+      selectionsRef.current.quantity === ADMIN_RESET_QUANTITY
+    ) {
+      finishedRef.current = true;
+      resetExperimentRef.current();
+      return;
+    }
     finishedRef.current = true;
     const { size: sz, quantity: q, color: c } = selectionsRef.current;
     completePatternRef.current({

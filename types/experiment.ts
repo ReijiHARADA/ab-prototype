@@ -48,15 +48,7 @@ export interface UserInfo {
   bodyType: BodyTypeKey;
 }
 
-export type ConditionId =
-  | "sales_volume"
-  | "age_based"
-  | "gender_based"
-  | "region_based"
-  | "design_preference"
-  | "body_type"
-  | "realtime_behavior"
-  | "none";
+export type ConditionId = "body_type" | "design_preference" | "none";
 
 export type PatternAction = "add_to_cart" | "back" | "timeout";
 

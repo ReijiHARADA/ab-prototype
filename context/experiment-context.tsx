@@ -28,7 +28,7 @@ import type {
   UserInfo,
 } from "@/types/experiment";
 
-const STORAGE_KEY = "ab-experiment-state-v2";
+const STORAGE_KEY = "ab-experiment-state-v3";
 
 interface PersistedV1 {
   version: 1;
@@ -70,17 +70,6 @@ function newSessionId(): string {
   return `sess-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-/** 同一パターン内で固定の「閲覧者数」（決定的なハッシュ） */
-function viewerFromSession(sessionId: string, conditionIndex: number): number {
-  const s = `${sessionId}:${conditionIndex}`;
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return 18 + (Math.abs(h) % (96 - 18 + 1));
-}
-
 function userInfoForLog(u: UserInfo, lang: Language): PatternLog["userInfo"] {
   const m = getMessages(lang);
   return {
@@ -110,7 +99,6 @@ interface ExperimentContextValue {
   currentConditionId: ConditionId;
   socialProofText: string;
   socialProofSegments: SocialProofSegment[];
-  viewerCountForPattern: number;
   useHeightForBodyType: boolean;
   sessionId: string;
   experimentStartedAt: string | null;
@@ -242,11 +230,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
 
   const useHeightForBodyType = conditionIndex % 2 === 0;
 
-  const viewerCountForPattern = useMemo(
-    () => viewerFromSession(sessionId, conditionIndex),
-    [sessionId, conditionIndex]
-  );
-
   const socialProofCtx = useMemo(
     () =>
       language && userInfo
@@ -254,17 +237,10 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
             language,
             user: userInfo,
             conditionId: currentConditionId,
-            viewerCount: viewerCountForPattern,
             useHeightForBodyType,
           }
         : null,
-    [
-      language,
-      userInfo,
-      currentConditionId,
-      viewerCountForPattern,
-      useHeightForBodyType,
-    ]
+    [language, userInfo, currentConditionId, useHeightForBodyType]
   );
 
   const socialProofSegments = useMemo(
@@ -377,7 +353,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     currentConditionId,
     socialProofText,
     socialProofSegments,
-    viewerCountForPattern,
     useHeightForBodyType,
     sessionId,
     experimentStartedAt,
