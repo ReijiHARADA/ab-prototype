@@ -19,9 +19,14 @@ export function BodyTypeResult() {
           {m.bodyTypeScreenTitle}
         </p>
         <div className="rounded-2xl border-2 border-neutral-900 bg-neutral-50 px-5 py-7">
-          <p className="text-center text-[1.35rem] font-bold leading-snug tracking-tight text-neutral-900 sm:text-2xl">
-            {m.bodyTypeYourType(label)}
-          </p>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-xs font-medium text-neutral-600 sm:text-sm">
+              {m.bodyTypeYourTypeLead}
+            </p>
+            <p className="text-[1.35rem] font-bold leading-snug tracking-tight text-neutral-900 sm:text-2xl">
+              {m.bodyTypeYourTypeQuote(label)}
+            </p>
+          </div>
         </div>
         <p className="text-sm leading-relaxed text-neutral-600">
           {m.bodyTypeExplanation}
