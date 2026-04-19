@@ -40,7 +40,7 @@ export function PatternSelectScreen() {
             </p>
           </header>
 
-          <div className="space-y-2 rounded-xl border border-red-200 bg-white/90 px-4 py-3 text-xs leading-relaxed text-red-950">
+          <div className="space-y-2 text-xs leading-relaxed text-red-950">
             <p>{m.patternLegendA}</p>
             <p>{m.patternLegendB}</p>
             <p>{m.patternLegendC}</p>
@@ -58,7 +58,7 @@ export function PatternSelectScreen() {
                 className={cn(
                   "flex w-full items-center justify-between rounded-xl border-2 px-4 py-3.5 text-left transition-colors",
                   selected
-                    ? "border-red-600 bg-red-600 text-white shadow-md"
+                    ? "border-red-600 bg-red-600 text-white"
                     : "border-neutral-200 bg-white text-neutral-900 hover:border-red-300 hover:bg-red-50/50"
                 )}
               >
@@ -89,7 +89,7 @@ export function PatternSelectScreen() {
           type="button"
           disabled={selectedPattern == null}
           className={cn(
-            "h-12 min-h-12 w-full rounded-xl text-base font-semibold text-white shadow-sm",
+            "h-12 min-h-12 w-full rounded-xl text-base font-semibold text-white",
             "border-0 bg-red-600 hover:bg-red-700 active:bg-red-800",
             "disabled:pointer-events-none disabled:opacity-40"
           )}
