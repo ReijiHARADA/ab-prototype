@@ -31,7 +31,7 @@ export function PatternSelectScreen() {
           <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-red-600">
             {m.experimenterOnlyBadge}
           </p>
-          <header className="mb-4">
+          <header>
             <h1 className="text-xl font-semibold tracking-tight text-red-900">
               {m.patternSelectTitle}
             </h1>
@@ -39,12 +39,6 @@ export function PatternSelectScreen() {
               {m.patternSelectIntro}
             </p>
           </header>
-
-          <div className="space-y-2 rounded-xl border border-red-200 bg-white/90 px-4 py-3 text-xs leading-relaxed text-red-950">
-            <p>{m.patternLegendA}</p>
-            <p>{m.patternLegendB}</p>
-            <p>{m.patternLegendC}</p>
-          </div>
         </div>
 
         <div className="flex flex-1 flex-col gap-2">

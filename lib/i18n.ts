@@ -14,9 +14,6 @@ const ja = {
   patternSelectTitle: "表示パターンを選択してください",
   patternSelectIntro:
     "商品詳細は3回表示されます。a・b・c の順序が変わります。",
-  patternLegendA: "a：ソーシャルプルーフを表示しない",
-  patternLegendB: "b：デザインの好みを反映したソーシャルプルーフ",
-  patternLegendC: "c：体型を反映したソーシャルプルーフ",
   experimentStartCta: "実験開始",
   patternN: (n: number) => `パターン${n}`,
   languageJa: "日本語",
@@ -146,9 +143,6 @@ const ko = {
   patternSelectTitle: "표시 패턴을 선택하세요",
   patternSelectIntro:
     "상품 상세는 3번 표시됩니다. a·b·c 순서가 달라집니다.",
-  patternLegendA: "a: 소셜 프루프 비표시",
-  patternLegendB: "b: 디자인 취향을 반영한 소셜 프루프",
-  patternLegendC: "c: 체형을 반영한 소셜 프루프",
   experimentStartCta: "실험 시작",
   patternN: (n: number) => `패턴 ${n}`,
   languageJa: "日本語",
