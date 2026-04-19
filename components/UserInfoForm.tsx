@@ -10,14 +10,20 @@ import { DESIGN_TAG_LIST, getMessages, getRegionOptions } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { DesignTag, Language, Region, UserInfo } from "@/types/experiment";
 
-function heights(): number[] {
+/** 5cm 区間（例: 146~150）。BMI 用の身長は区間の中央（下限+2cm）とする */
+function heightRangeMins(): number[] {
   const out: number[] = [];
-  for (let h = 140; h <= 200; h += 5) out.push(h);
+  for (let min = 140; min <= 196; min += 5) out.push(min);
   return out;
 }
 
-function heightOptionLabel(cm: number): string {
-  return `~${cm}cm`;
+function heightMidCm(rangeMin: number): number {
+  return rangeMin + 2;
+}
+
+function heightRangeLabel(rangeMin: number, heightUnit: string): string {
+  const max = rangeMin + 4;
+  return `${rangeMin}~${max}${heightUnit}`;
 }
 
 function weights(): number[] {
@@ -35,31 +41,22 @@ export function UserInfoForm() {
 
   const [step, setStep] = useState<WizardStep>(1);
 
-  const [designTags, setDesignTags] = useState<DesignTag[]>(["simple"]);
-  const [heightCm, setHeightCm] = useState(170);
+  const [designTag, setDesignTag] = useState<DesignTag>("simple");
+  /** 選択中の身長レンジの下限（140, 145, …）。保存する heightCm は区間の中央 */
+  const [heightRangeMin, setHeightRangeMin] = useState(170);
   const [weightKg, setWeightKg] = useState(65);
-
-  const toggleTag = (t: DesignTag) => {
-    setDesignTags((prev) => {
-      if (prev.includes(t)) {
-        if (prev.length <= 1) return prev;
-        return prev.filter((x) => x !== t);
-      }
-      return [...prev, t];
-    });
-  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const heightCm = heightMidCm(heightRangeMin);
     const bmi = calculateBmi(heightCm, weightKg);
     const bodyType = getBodyTypeFromBmi(bmi);
-    const tags = designTags.length > 0 ? designTags : (["simple"] as DesignTag[]);
     const region = (getRegionOptions(lang)[0]?.value ?? "tokyo") as Region;
     const payload: UserInfo = {
       ageGroup: "20s",
       gender: "male",
       region,
-      designTags: tags,
+      designTag,
       heightCm,
       weightKg,
       bmi,
@@ -87,12 +84,12 @@ export function UserInfoForm() {
 
             <div className="flex flex-wrap gap-2">
               {DESIGN_TAG_LIST.map((t) => {
-                const on = designTags.includes(t);
+                const on = designTag === t;
                 return (
                   <button
                     key={t}
                     type="button"
-                    onClick={() => toggleTag(t)}
+                    onClick={() => setDesignTag(t)}
                     className={cn(
                       "rounded-full border px-4 py-2.5 text-sm font-medium transition-colors",
                       on
@@ -126,12 +123,12 @@ export function UserInfoForm() {
                 </Label>
                 <select
                   className={bodySelectClass}
-                  value={heightCm}
-                  onChange={(e) => setHeightCm(Number(e.target.value))}
+                  value={heightRangeMin}
+                  onChange={(e) => setHeightRangeMin(Number(e.target.value))}
                 >
-                  {heights().map((h) => (
-                    <option key={h} value={h}>
-                      {heightOptionLabel(h)}
+                  {heightRangeMins().map((min) => (
+                    <option key={min} value={min}>
+                      {heightRangeLabel(min, m.heightUnit)}
                     </option>
                   ))}
                 </select>

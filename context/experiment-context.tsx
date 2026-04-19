@@ -81,7 +81,7 @@ function newSessionId(): string {
 function userInfoForLog(u: UserInfo, lang: Language): PatternLog["userInfo"] {
   const m = getMessages(lang);
   return {
-    designTags: u.designTags.map((t) => m.designTags[t]),
+    designTag: m.designTags[u.designTag],
     height: u.heightCm,
     weight: u.weightKg,
     bmi: Math.round(u.bmi * 100) / 100,
@@ -165,7 +165,18 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     if (p.sequencePattern != null && isSequencePatternId(p.sequencePattern)) {
       setSequencePattern(p.sequencePattern);
     }
-    if (p.userInfo) setUserInfo(p.userInfo);
+    if (p.userInfo) {
+      const u = p.userInfo as UserInfo & { designTags?: UserInfo["designTag"][] };
+      if (Array.isArray(u.designTags)) {
+        const { designTags: legacyTags, ...rest } = u;
+        setUserInfo({
+          ...rest,
+          designTag: legacyTags[0] ?? "simple",
+        });
+      } else {
+        setUserInfo(u);
+      }
+    }
     if (p.step) setStep(p.step);
     if (typeof p.conditionIndex === "number") {
       setConditionIndex(p.conditionIndex);

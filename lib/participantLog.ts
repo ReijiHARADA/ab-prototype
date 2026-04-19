@@ -12,6 +12,15 @@ export function languageToSheetTab(lang: Language): SpreadsheetSheetTab {
 
 const EXPECTED_ROUNDS = 3;
 
+/** 旧ログ（`userInfo.designTags` 配列）と新ログ（単一 `designTag`）の両方に対応 */
+function designPreferenceJoined(
+  u: PatternLog["userInfo"] | { designTags?: string[] }
+): string {
+  if ("designTag" in u && typeof u.designTag === "string") return u.designTag;
+  const tags = (u as { designTags?: string[] }).designTags;
+  return Array.isArray(tags) ? tags.join("、") : "";
+}
+
 /**
  * 同一セッションの PatternLog（条件ごと1件）から、1参加者1行のレコードを組み立てる。
  */
@@ -52,7 +61,7 @@ export function buildParticipantSessionLog(
     sheetTab: languageToSheetTab(lang),
     sequencePattern: first.sequencePattern,
     experimentStartedAt: experimentStartedAt ?? undefined,
-    designTagsJoined: u.designTags.join("、"),
+    designTagsJoined: designPreferenceJoined(u),
     height: u.height,
     weight: u.weight,
     bmi: u.bmi,

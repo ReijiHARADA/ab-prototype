@@ -44,7 +44,7 @@ export interface UserInfo {
   ageGroup: AgeGroup;
   gender: Gender;
   region: Region;
-  designTags: DesignTag[];
+  designTag: DesignTag;
   heightCm: number;
   weightKg: number;
   bmi: number;
@@ -115,7 +115,7 @@ export interface PatternLog {
   conditionId: ConditionId;
   socialProofText: string;
   userInfo: {
-    designTags: string[];
+    designTag: string;
     height: number;
     weight: number;
     bmi: number;

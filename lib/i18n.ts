@@ -26,7 +26,7 @@ const ja = {
   userInfoBack: "戻る",
   userInfoIntroShort: "商品のおすすめ表示に利用します。",
   userInfoDesignTitle: "デザインの好み",
-  userInfoDesignHint: "当てはまるものをすべて選んでください（複数選択可）",
+  userInfoDesignHint: "当てはまるものを1つ選んでください",
   userInfoBodyTitle: "身長・体重",
   userInfoBodyHint: "サイズの参考に利用します。",
   surveyPromptTitle: "Googleフォーム",
@@ -134,7 +134,7 @@ const ja = {
   productDetailBody:
     "商品番号: 475355。掲載画像には販売予定にないカラーが含まれている場合があります。着丈・身幅などの採寸情報は参考値です。",
   productSpecsBody:
-    "きれいなシルエットに仕上がる素材。XS・XXL・3XL・4XLサイズは、オンラインストアのみでの取り扱いとなります。",
+    "きれいなシルエットに仕上がる素材。軽やかな着心地で、インナーにも一枚でも着やすい一枚です。",
   productMaterialCareBody:
     "【素材】53% 綿、30% ポリエステル、17% 複合繊維（ポリエステル）（30% リサイクルポリエステル繊維を使用）\n\n【取扱い】洗濯機可、ドライクリーニング可、乾燥機不可。濃色は色落ちする事がありますので、他の物とのお洗濯はお避け下さい。汗や雨等で湿った状態、または摩擦によって、他の物に色移りする事がありますので、ご注意下さい。",
   colorPink: "12 PINK",
@@ -159,7 +159,7 @@ const ko = {
   userInfoBack: "뒤로",
   userInfoIntroShort: "상품 추천 표시에 활용합니다.",
   userInfoDesignTitle: "디자인 취향",
-  userInfoDesignHint: "해당하는 항목을 모두 선택해 주세요(복수 선택)",
+  userInfoDesignHint: "해당하는 항목을 하나만 선택해 주세요",
   userInfoBodyTitle: "키·체중",
   userInfoBodyHint: "사이즈 참고에 활용합니다.",
   surveyPromptTitle: "Google Form",
@@ -266,7 +266,7 @@ const ko = {
   productDetailBody:
     "상품 번호: 475355. 게재 이미지에 판매 예정이 아닌 컬러가 포함될 수 있습니다. 기장·가슴둘레 등 치수 정보는 참고용입니다.",
   productSpecsBody:
-    "깔끔한 실루엣을 내는 소재. XS·XXL·3XL·4XL 사이즈는 온라인 스토어에서만 취급합니다.",
+    "깔끔한 실루엣을 내는 소재. 가볍게 입을 수 있어 이너로도 단품으로도 활용하기 좋습니다.",
   productMaterialCareBody:
     "【소재】면 53%, 폴리에스터 30%, 복합 섬유(폴리에스터) 17% (리사이클 폴리에스터 섬유 30% 사용)\n\n【취급】세탁기 사용 가능, 드라이클리닝 가능, 건조기 사용 불가. 짙은 색은 이염할 수 있으므로 다른 옷과 함께 세탁하지 마세요. 땀이나 비 등으로 젖었을 때, 또는 마찰로 다른 물건에 이염될 수 있으니 주의하세요.",
   colorPink: "12 PINK",

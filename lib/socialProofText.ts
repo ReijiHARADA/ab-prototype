@@ -20,10 +20,7 @@ function labelForUser(
   designPick: string;
   bodyTypeLabel: string;
 } {
-  const designPick =
-    u.designTags.length > 0
-      ? m.designTags[u.designTags[0]!]
-      : m.designTags.simple;
+  const designPick = m.designTags[u.designTag];
   return {
     designPick,
     bodyTypeLabel: m.bodyTypeLabels[u.bodyType],
