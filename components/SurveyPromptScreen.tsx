@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,7 +20,21 @@ export function SurveyPromptScreen() {
   } = useExperiment();
   const m = getMessages(language ?? "ja");
   const [confirmed, setConfirmed] = useState(false);
+  const [saving, setSaving] = useState(false);
   const isLastSurvey = conditionIndex === totalConditions - 1;
+
+  const handleAdvance = async () => {
+    if (isLastSurvey) {
+      setSaving(true);
+      try {
+        await advanceFromSurveyPrompt();
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+    void advanceFromSurveyPrompt();
+  };
 
   return (
     <div className="flex min-h-[55vh] flex-col justify-center gap-8 px-6 py-12">
@@ -54,14 +68,31 @@ export function SurveyPromptScreen() {
           </Label>
         </div>
       )}
-      <Button
-        type="button"
-        className="h-12 w-full rounded-md text-base"
-        disabled={!isLastSurvey && !confirmed}
-        onClick={() => advanceFromSurveyPrompt()}
-      >
-        {isLastSurvey ? m.surveyPromptLastCta : m.surveyPromptCta}
-      </Button>
+      {isLastSurvey && saving ? (
+        <div
+          className="flex flex-col items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-8"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <Loader2
+            className="size-8 animate-spin text-neutral-600"
+            aria-hidden
+          />
+          <p className="text-sm font-medium text-neutral-800">
+            {m.surveyPromptSaving}
+          </p>
+        </div>
+      ) : (
+        <Button
+          type="button"
+          className="h-12 w-full rounded-md text-base"
+          disabled={saving || (!isLastSurvey && !confirmed)}
+          onClick={() => void handleAdvance()}
+        >
+          {isLastSurvey ? m.surveyPromptLastCta : m.surveyPromptCta}
+        </Button>
+      )}
     </div>
   );
 }

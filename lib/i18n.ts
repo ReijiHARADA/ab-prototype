@@ -39,6 +39,8 @@ const ja = {
   surveyPromptLastBody:
     "プロトタイプの操作はこれで終了です。Googleフォームのアンケートに回答してください。",
   surveyPromptLastCta: "プロトタイプ操作を終了する。",
+  /** 最終画面で送信〜遷移までの待機表示 */
+  surveyPromptSaving: "記録中です…",
   productHeroCarouselAria: "商品画像（横にスワイプ）",
   productCarouselDotAria: (n: number, total: number) =>
     `画像 ${n} / ${total}`,
@@ -172,6 +174,7 @@ const ko = {
   surveyPromptLastBody:
     "프로토타입 조작은 여기까지입니다. Google 폼 설문에 응답해 주세요.",
   surveyPromptLastCta: "프로토타입 조작을 종료합니다.",
+  surveyPromptSaving: "기록 중입니다…",
   productHeroCarouselAria: "상품 이미지(가로로 스와이프)",
   productCarouselDotAria: (n: number, total: number) =>
     `이미지 ${n} / ${total}`,

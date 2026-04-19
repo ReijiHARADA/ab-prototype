@@ -101,8 +101,8 @@ interface ExperimentContextValue {
   setUserInfoDraft: (u: UserInfo) => void;
   submitUserInfo: (u: UserInfo) => void;
   step: AppStep;
-  /** 戻る後の中間画面 → 次パターンの商品（ソーシャルプルーフ）へ */
-  advanceFromSurveyPrompt: () => void;
+  /** 戻る後の中間画面 → 次パターンの商品（ソーシャルプルーフ）へ。最終送信を待つため Promise を返す */
+  advanceFromSurveyPrompt: () => Promise<void>;
   goProductFromBodyType: () => void;
   conditionIndex: number;
   totalConditions: number;
@@ -305,8 +305,8 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setPatternStartedAt(t);
   }, []);
 
-  const advanceFromSurveyPrompt = useCallback(() => {
-    void (async () => {
+  const advanceFromSurveyPrompt = useCallback((): Promise<void> => {
+    return (async () => {
       const order =
         sequencePattern != null
           ? SEQUENCE_PATTERN_ORDERS[sequencePattern]
