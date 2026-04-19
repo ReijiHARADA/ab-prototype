@@ -2,6 +2,7 @@
 
 import { BodyTypeResult } from "@/components/BodyTypeResult";
 import { LanguageSelect } from "@/components/LanguageSelect";
+import { PatternSelectScreen } from "@/components/PatternSelectScreen";
 import { PhoneShell } from "@/components/PhoneShell";
 import { ProductDetail } from "@/components/ProductDetail";
 import { ResultDashboard } from "@/components/ResultDashboard";
@@ -15,6 +16,9 @@ export function ExperimentFlow() {
   return (
     <PhoneShell>
       {step === "language" && <LanguageSelect />}
+      {step === "patternSelect" && language && (
+        <PatternSelectScreen key={language} />
+      )}
       {step === "userInfo" && language && (
         <UserInfoForm key={language} />
       )}

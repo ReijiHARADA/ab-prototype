@@ -10,6 +10,13 @@ import type {
 const ja = {
   appTitle: "商品詳細（実験）",
   languageTitle: "言語を選択してください",
+  patternSelectTitle: "表示パターンを選択してください",
+  patternSelectIntro:
+    "商品詳細は3回表示されます。a・b・c の順序が変わります。",
+  patternLegendA: "a：ソーシャルプルーフなし",
+  patternLegendB: "b：デザインの好みに基づく",
+  patternLegendC: "c：体型に基づく",
+  patternN: (n: number) => `パターン${n}`,
   languageJa: "日本語",
   languageKo: "한국어",
   userInfoTitle: "基本情報",
@@ -133,6 +140,13 @@ const ja = {
 const ko = {
   appTitle: "상품 상세 (실험)",
   languageTitle: "언어를 선택하세요",
+  patternSelectTitle: "표시 패턴을 선택하세요",
+  patternSelectIntro:
+    "상품 상세는 3번 표시됩니다. a·b·c 순서가 달라집니다.",
+  patternLegendA: "a: 소셜 프루프 없음",
+  patternLegendB: "b: 디자인 취향 기반",
+  patternLegendC: "c: 체형 기반",
+  patternN: (n: number) => `패턴 ${n}`,
   languageJa: "日本語",
   languageKo: "한국어",
   userInfoTitle: "기본 정보",

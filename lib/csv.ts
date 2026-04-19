@@ -11,6 +11,7 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
   const headers = [
     "sessionId",
     "language",
+    "sequencePattern",
     "conditionIndex",
     "conditionId",
     "socialProofText",
@@ -28,6 +29,7 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
     const row = [
       log.sessionId,
       log.language,
+      String(log.sequencePattern),
       String(log.conditionIndex),
       log.conditionId,
       log.socialProofText,

@@ -11,7 +11,11 @@ import {
   type ReactNode,
 } from "react";
 
-import { CONDITION_ORDER, getConditionIdAtIndex } from "@/lib/experiment";
+import {
+  getConditionIdAtIndexInOrder,
+  isSequencePatternId,
+  SEQUENCE_PATTERN_ORDERS,
+} from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
 import { logPatternResult } from "@/lib/logger";
 import {
@@ -25,19 +29,21 @@ import type {
   Language,
   PatternAction,
   PatternLog,
+  SequencePatternId,
   UserInfo,
 } from "@/types/experiment";
 
-const STORAGE_KEY = "ab-experiment-state-v3";
+const STORAGE_KEY = "ab-experiment-state-v4";
 
 interface PersistedV1 {
   version: 1;
   sessionId: string;
   language: Language;
-  userInfo: UserInfo;
+  experimentStartedAt: string;
+  sequencePattern: SequencePatternId | null;
+  userInfo: UserInfo | null;
   step: AppStep;
   conditionIndex: number;
-  experimentStartedAt: string;
   /** 商品画面の開始（タイマー再開用） */
   patternStartedAt: string;
 }
@@ -87,6 +93,11 @@ function userInfoForLog(u: UserInfo, lang: Language): PatternLog["userInfo"] {
 interface ExperimentContextValue {
   language: Language | null;
   setLanguage: (l: Language) => void;
+  /** 言語選択後に選ぶ a/b/c の順序（1〜6） */
+  sequencePattern: SequencePatternId | null;
+  submitSequencePattern: (id: SequencePatternId) => void;
+  /** 現在のセッションで使う条件の並び（3件） */
+  conditionOrder: readonly ConditionId[];
   userInfo: UserInfo | null;
   setUserInfoDraft: (u: UserInfo) => void;
   submitUserInfo: (u: UserInfo) => void;
@@ -120,6 +131,8 @@ const PATTERN_MS = 120_000;
 
 export function ExperimentProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language | null>(null);
+  const [sequencePattern, setSequencePattern] =
+    useState<SequencePatternId | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [step, setStep] = useState<AppStep>("language");
   const [conditionIndex, setConditionIndex] = useState(0);
@@ -145,6 +158,9 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     /* eslint-disable react-hooks/set-state-in-effect -- マウント時の一度限りの復元 */
     setSessionId(p.sessionId);
     if (p.language) setLanguageState(p.language);
+    if (p.sequencePattern != null && isSequencePatternId(p.sequencePattern)) {
+      setSequencePattern(p.sequencePattern);
+    }
     if (p.userInfo) setUserInfo(p.userInfo);
     if (p.step) setStep(p.step);
     if (typeof p.conditionIndex === "number") {
@@ -162,15 +178,16 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
 
   const persist = useCallback(
     (overrides?: Partial<PersistedV1>) => {
-      if (!language || !userInfo || !experimentStartedAt) return;
+      if (!language || !experimentStartedAt) return;
       const base: PersistedV1 = {
         version: 1,
         sessionId,
         language,
+        experimentStartedAt,
+        sequencePattern,
         userInfo,
         step,
         conditionIndex,
-        experimentStartedAt,
         patternStartedAt: patternStartedAt ?? new Date().toISOString(),
         ...overrides,
       };
@@ -178,6 +195,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     },
     [
       language,
+      sequencePattern,
       userInfo,
       experimentStartedAt,
       sessionId,
@@ -188,10 +206,11 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (!language || !userInfo || !experimentStartedAt) return;
+    if (!language || !experimentStartedAt) return;
     persist();
   }, [
     language,
+    sequencePattern,
     userInfo,
     step,
     conditionIndex,
@@ -205,7 +224,14 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     const sid = newSessionId();
     setSessionId(sid);
     setLanguageState(l);
+    setSequencePattern(null);
+    setUserInfo(null);
     setExperimentStartedAt(new Date().toISOString());
+    setStep("patternSelect");
+  }, []);
+
+  const submitSequencePattern = useCallback((id: SequencePatternId) => {
+    setSequencePattern(id);
     setStep("userInfo");
   }, []);
 
@@ -222,9 +248,14 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setStep("product");
   }, []);
 
+  const conditionOrder = useMemo((): readonly ConditionId[] => {
+    if (sequencePattern == null) return SEQUENCE_PATTERN_ORDERS[1];
+    return SEQUENCE_PATTERN_ORDERS[sequencePattern];
+  }, [sequencePattern]);
+
   const currentConditionId = useMemo(
-    () => getConditionIdAtIndex(conditionIndex),
-    [conditionIndex]
+    () => getConditionIdAtIndexInOrder(conditionOrder, conditionIndex),
+    [conditionOrder, conditionIndex]
   );
 
   const socialProofCtx = useMemo(
@@ -256,8 +287,12 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const advanceFromSurveyPrompt = useCallback(() => {
+    const order =
+      sequencePattern != null
+        ? SEQUENCE_PATTERN_ORDERS[sequencePattern]
+        : SEQUENCE_PATTERN_ORDERS[1];
     const next = conditionIndex + 1;
-    if (next >= CONDITION_ORDER.length) {
+    if (next >= order.length) {
       setStep("completed");
       clearPersisted();
       return;
@@ -265,7 +300,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     bumpPatternClock();
     setConditionIndex(next);
     setStep("product");
-  }, [conditionIndex, bumpPatternClock]);
+  }, [conditionIndex, sequencePattern, bumpPatternClock]);
 
   const completePattern = useCallback(
     (args: {
@@ -276,6 +311,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       quantity: number;
     }) => {
       if (!language || !userInfo || !experimentStartedAt) return;
+      if (sequencePattern == null) return;
       const startIso = patternStartedAtRef.current;
       const endedIso = new Date().toISOString();
       const durationMs = Math.max(
@@ -285,6 +321,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       const log: PatternLog = {
         sessionId,
         language,
+        sequencePattern,
         conditionIndex,
         conditionId: currentConditionId,
         socialProofText,
@@ -320,12 +357,14 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
       conditionIndex,
       currentConditionId,
       socialProofText,
+      sequencePattern,
     ]
   );
 
   const resetExperiment = useCallback(() => {
     clearPersisted();
     setLanguageState(null);
+    setSequencePattern(null);
     setUserInfo(null);
     setStep("language");
     setConditionIndex(0);
@@ -338,6 +377,9 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   const value: ExperimentContextValue = {
     language,
     setLanguage,
+    sequencePattern,
+    submitSequencePattern,
+    conditionOrder,
     userInfo,
     setUserInfoDraft: setUserInfo,
     submitUserInfo,
@@ -345,7 +387,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     advanceFromSurveyPrompt,
     goProductFromBodyType,
     conditionIndex,
-    totalConditions: CONDITION_ORDER.length,
+    totalConditions: conditionOrder.length,
     currentConditionId,
     socialProofText,
     socialProofSegments,

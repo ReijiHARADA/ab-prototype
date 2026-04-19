@@ -50,6 +50,9 @@ export interface UserInfo {
 
 export type ConditionId = "body_type" | "design_preference" | "none";
 
+/** 商品詳細3回分の条件順（a/b/c の並び替え） */
+export type SequencePatternId = 1 | 2 | 3 | 4 | 5 | 6;
+
 export type PatternAction = "add_to_cart" | "back" | "timeout";
 
 export interface ExperimentSession {
@@ -62,6 +65,8 @@ export interface ExperimentSession {
 export interface PatternLog {
   sessionId: string;
   language: Language;
+  /** 選択したパターン（1〜6）。商品の表示順の再現に用いる */
+  sequencePattern: SequencePatternId;
   conditionIndex: number;
   conditionId: ConditionId;
   socialProofText: string;
@@ -99,6 +104,7 @@ export interface EventLog {
 
 export type AppStep =
   | "language"
+  | "patternSelect"
   | "userInfo"
   | "bodyType"
   | "product"
