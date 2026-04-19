@@ -1,4 +1,4 @@
-import type { PatternLog } from "@/types/experiment";
+import type { ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
 function escapeCsvCell(value: string): string {
   if (/[",\n\r]/.test(value)) {
@@ -43,6 +43,78 @@ export function patternLogsToCsv(logs: PatternLog[]): string {
       log.endedAt,
     ].map((cell) => escapeCsvCell(String(cell)));
     lines.push(row.join(","));
+  }
+  return lines.join("\n");
+}
+
+const ROUND_FIELD_KEYS = [
+  "conditionId",
+  "socialProofText",
+  "action",
+  "durationSec",
+  "selectedSize",
+  "selectedColor",
+  "quantity",
+  "startedAt",
+  "endedAt",
+] as const;
+
+/** 1参加者1行（3条件分を横に展開）。Excel 取り込み用。 */
+export function participantSessionsToCsv(logs: ParticipantSessionLog[]): string {
+  const headers = [
+    "sessionId",
+    "language",
+    "spreadsheetTarget",
+    "sequencePattern",
+    "experimentStartedAt",
+    "ageGroup",
+    "gender",
+    "region",
+    "designTags",
+    "height",
+    "weight",
+    "bmi",
+    "bodyType",
+    ...[0, 1, 2].flatMap((r) =>
+      ROUND_FIELD_KEYS.map((k) => `round${r}_${k}`)
+    ),
+  ];
+  const lines = [headers.join(",")];
+  for (const p of logs) {
+    const row: string[] = [
+      p.sessionId,
+      p.language,
+      p.spreadsheetTarget,
+      String(p.sequencePattern),
+      p.experimentStartedAt ?? "",
+      p.ageGroup,
+      p.gender,
+      p.region,
+      p.designTagsJoined,
+      String(p.height),
+      String(p.weight),
+      String(p.bmi),
+      p.bodyType,
+    ];
+    for (let r = 0; r < 3; r++) {
+      const round = p.rounds[r];
+      if (!round) {
+        for (let i = 0; i < ROUND_FIELD_KEYS.length; i++) row.push("");
+        continue;
+      }
+      row.push(
+        round.conditionId,
+        round.socialProofText,
+        round.action,
+        String(round.durationSec),
+        round.selectedSize,
+        round.selectedColor,
+        String(round.quantity),
+        round.startedAt,
+        round.endedAt
+      );
+    }
+    lines.push(row.map((cell) => escapeCsvCell(String(cell))).join(","));
   }
   return lines.join("\n");
 }

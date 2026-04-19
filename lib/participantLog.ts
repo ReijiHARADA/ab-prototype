@@ -1,0 +1,77 @@
+import type {
+  ParticipantSessionLog,
+  PatternLog,
+} from "@/types/experiment";
+
+const EXPECTED_ROUNDS = 3;
+
+/**
+ * 同一セッションの PatternLog（条件ごと1件）から、1参加者1行のレコードを組み立てる。
+ */
+export function buildParticipantSessionLog(
+  logs: PatternLog[],
+  experimentStartedAt?: string | null
+): ParticipantSessionLog | null {
+  if (logs.length < EXPECTED_ROUNDS) return null;
+  const sorted = [...logs].sort((a, b) => a.conditionIndex - b.conditionIndex);
+  const first = sorted[0];
+  if (!first) return null;
+  const sid = first.sessionId;
+  if (sorted.some((l) => l.sessionId !== sid)) return null;
+  if (sorted.length !== EXPECTED_ROUNDS) return null;
+  for (let i = 0; i < EXPECTED_ROUNDS; i++) {
+    if (sorted[i]?.conditionIndex !== i) return null;
+  }
+
+  const lang = first.language;
+  const u = first.userInfo;
+  const rounds = sorted.map((log) => ({
+    conditionIndex: log.conditionIndex,
+    conditionId: log.conditionId,
+    socialProofText: log.socialProofText,
+    action: log.action,
+    durationSec: log.durationSec,
+    durationMs: log.durationMs,
+    selectedSize: log.selectedSize,
+    selectedColor: log.selectedColor,
+    quantity: log.quantity,
+    startedAt: log.startedAt,
+    endedAt: log.endedAt,
+  }));
+
+  return {
+    type: "participantSession",
+    sessionId: sid,
+    language: lang,
+    spreadsheetTarget: lang,
+    sequencePattern: first.sequencePattern,
+    experimentStartedAt: experimentStartedAt ?? undefined,
+    ageGroup: u.ageGroup,
+    gender: u.gender,
+    region: u.region,
+    designTagsJoined: u.designTags.join("、"),
+    height: u.height,
+    weight: u.weight,
+    bmi: u.bmi,
+    bodyType: u.bodyType,
+    rounds,
+  };
+}
+
+/** 保存済み PatternLog 一覧からセッション単位にまとめる（CSV 用） */
+export function groupPatternLogsToParticipantSessions(
+  logs: PatternLog[]
+): ParticipantSessionLog[] {
+  const bySession = new Map<string, PatternLog[]>();
+  for (const log of logs) {
+    const arr = bySession.get(log.sessionId) ?? [];
+    arr.push(log);
+    bySession.set(log.sessionId, arr);
+  }
+  const out: ParticipantSessionLog[] = [];
+  for (const group of bySession.values()) {
+    const row = buildParticipantSessionLog(group);
+    if (row) out.push(row);
+  }
+  return out;
+}

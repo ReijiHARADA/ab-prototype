@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useExperiment } from "@/context/experiment-context";
-import { downloadCsv, patternLogsToCsv } from "@/lib/csv";
-import { getLocalLogs, getLocalPatternLogs } from "@/lib/logger";
+import { downloadCsv, participantSessionsToCsv } from "@/lib/csv";
+import { groupPatternLogsToParticipantSessions } from "@/lib/participantLog";
+import { getLocalLogs, getLocalParticipantLogs, getLocalPatternLogs } from "@/lib/logger";
 import { getMessages } from "@/lib/i18n";
 
 export function ResultDashboard() {
@@ -15,7 +16,7 @@ export function ResultDashboard() {
   const m = getMessages(lang);
   const [showStorage, setShowStorage] = useState(true);
 
-  const { patternLogs: storedPatterns, eventLogs: storedEvents } =
+  const { patternLogs: storedPatterns, eventLogs: storedEvents, participantLogs: storedParticipants } =
     getLocalLogs();
 
   const fromStorage = useMemo(
@@ -28,6 +29,25 @@ export function ResultDashboard() {
       sessionPatternLogs.length > 0 ? sessionPatternLogs : fromStorage,
     [sessionPatternLogs, fromStorage]
   );
+
+  /** 1人1行の CSV 用（メモリの PatternLog またはローカル退避） */
+  const participantRowsForCsv = useMemo(() => {
+    const fromPatterns = groupPatternLogsToParticipantSessions(
+      sessionPatternLogs.length > 0 ? sessionPatternLogs : fromStorage
+    );
+    const fromLocal = getLocalParticipantLogs().filter(
+      (p) => p.sessionId === sessionId
+    );
+    const merged = [...fromPatterns];
+    for (const p of fromLocal) {
+      if (!merged.some((x) => x.sessionId === p.sessionId)) merged.push(p);
+    }
+    if (merged.length > 0) return merged;
+    const single = groupPatternLogsToParticipantSessions(
+      getLocalPatternLogs().filter((p) => p.sessionId === sessionId)
+    );
+    return single;
+  }, [sessionPatternLogs, fromStorage, sessionId]);
 
   const summary = useMemo(() => {
     const dwell = rows.map(
@@ -46,8 +66,11 @@ export function ResultDashboard() {
   }, [rows]);
 
   const onCsv = () => {
-    const csv = patternLogsToCsv(rows);
-    downloadCsv(`experiment-${Date.now()}.csv`, csv);
+    const csv = participantSessionsToCsv(participantRowsForCsv);
+    downloadCsv(
+      `experiment-${sessionId.slice(0, 8)}-${Date.now()}.csv`,
+      csv
+    );
   };
 
   const mark = (ok: boolean) => (ok ? "○" : "—");
@@ -56,6 +79,11 @@ export function ResultDashboard() {
     <div className="flex flex-col gap-8 px-4 py-6 pb-8 text-sm [padding-bottom:max(2rem,env(safe-area-inset-bottom))]">
       <div className="flex flex-col gap-3">
         <h1 className="text-lg font-medium">{m.resultTitle}</h1>
+        <p className="text-xs text-neutral-600">
+          {lang === "ja"
+            ? "CSV は1参加者1行です（3条件分を横に展開）。spreadsheetTarget で記録先を分けられます。"
+            : "CSV는 참가자 1명당 1행입니다(3개 조건을 가로로 펼침). spreadsheetTarget으로 기록 시트를 구분합니다."}
+        </p>
         <Button
           type="button"
           className="h-11 min-h-11 w-full max-w-xs rounded-md"
@@ -172,6 +200,16 @@ export function ResultDashboard() {
         </button>
         {showStorage && (
           <div className="space-y-4 rounded border border-dashed border-neutral-300 p-3 text-xs">
+            <p className="font-medium">
+              Participant (1行) ({storedParticipants.length})
+            </p>
+            <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded bg-neutral-100 p-2">
+              {JSON.stringify(
+                storedParticipants.filter((p) => p.sessionId === sessionId),
+                null,
+                2
+              )}
+            </pre>
             <p className="font-medium">Pattern logs ({storedPatterns.length})</p>
             <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-all rounded bg-neutral-100 p-2">
               {JSON.stringify(storedPatterns, null, 2)}

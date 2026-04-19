@@ -62,6 +62,38 @@ export interface ExperimentSession {
   startedAt: string;
 }
 
+/** スプレッドシート・集計用: 1参加者 = 1行（3条件分を rounds に内包） */
+export interface ParticipantSessionLog {
+  type: "participantSession";
+  sessionId: string;
+  language: Language;
+  /** 記録先シートの切り替え用（`ja` = 日本語用、`ko` = 韓国語用）。GAS で gid / シート名を切り替える */
+  spreadsheetTarget: Language;
+  sequencePattern: SequencePatternId;
+  experimentStartedAt?: string;
+  ageGroup: string;
+  gender: string;
+  region: string;
+  designTagsJoined: string;
+  height: number;
+  weight: number;
+  bmi: number;
+  bodyType: string;
+  rounds: Array<{
+    conditionIndex: number;
+    conditionId: ConditionId;
+    socialProofText: string;
+    action: PatternAction;
+    durationSec: number;
+    durationMs: number;
+    selectedSize: string;
+    selectedColor: string;
+    quantity: number;
+    startedAt: string;
+    endedAt: string;
+  }>;
+}
+
 export interface PatternLog {
   sessionId: string;
   language: Language;

@@ -1,8 +1,9 @@
 "use client";
 
-import type { EventLog, PatternLog } from "@/types/experiment";
+import type { EventLog, ParticipantSessionLog, PatternLog } from "@/types/experiment";
 
 const PATTERN_KEY = "ab-pattern-logs-v1";
+const PARTICIPANT_KEY = "ab-participant-logs-v1";
 const EVENT_KEY = "ab-event-logs-v1";
 
 function isBrowser(): boolean {
@@ -14,6 +15,13 @@ export function saveLocalPatternLog(log: PatternLog): void {
   const prev = getLocalPatternLogs();
   prev.push(log);
   window.localStorage.setItem(PATTERN_KEY, JSON.stringify(prev));
+}
+
+export function saveLocalParticipantLog(log: ParticipantSessionLog): void {
+  if (!isBrowser()) return;
+  const prev = getLocalParticipantLogs();
+  prev.push(log);
+  window.localStorage.setItem(PARTICIPANT_KEY, JSON.stringify(prev));
 }
 
 export function saveLocalEventLog(log: EventLog): void {
@@ -35,6 +43,18 @@ export function getLocalPatternLogs(): PatternLog[] {
   }
 }
 
+export function getLocalParticipantLogs(): ParticipantSessionLog[] {
+  if (!isBrowser()) return [];
+  try {
+    const raw = window.localStorage.getItem(PARTICIPANT_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as ParticipantSessionLog[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export function getLocalEventLogs(): EventLog[] {
   if (!isBrowser()) return [];
   try {
@@ -49,10 +69,12 @@ export function getLocalEventLogs(): EventLog[] {
 
 export function getLocalLogs(): {
   patternLogs: PatternLog[];
+  participantLogs: ParticipantSessionLog[];
   eventLogs: EventLog[];
 } {
   return {
     patternLogs: getLocalPatternLogs(),
+    participantLogs: getLocalParticipantLogs(),
     eventLogs: getLocalEventLogs(),
   };
 }
@@ -86,11 +108,21 @@ async function postPayload(body: unknown): Promise<boolean> {
   }
 }
 
-/** PatternLog をサーバーへ送る。失敗時は localStorage に保存。 */
+/** PatternLog をサーバーへ送る（旧・デバッグ用。通常は {@link logParticipantSession} のみ） */
 export async function logPatternResult(log: PatternLog): Promise<void> {
   const ok = await postPayload({ type: "pattern", ...log });
   if (!ok) {
     saveLocalPatternLog(log);
+  }
+}
+
+/** 1参加者1行（3条件まとめ）をサーバーへ送る。失敗時は localStorage に保存。 */
+export async function logParticipantSession(
+  log: ParticipantSessionLog
+): Promise<void> {
+  const ok = await postPayload(log);
+  if (!ok) {
+    saveLocalParticipantLog(log);
   }
 }
 
@@ -104,11 +136,15 @@ export async function logEvent(event: EventLog): Promise<void> {
 
 /** 後方互換・仕様名 */
 export function saveLocalLog(
-  log: PatternLog | EventLog
+  log: PatternLog | EventLog | ParticipantSessionLog
 ): void {
-  if ("conditionIndex" in log) {
-    saveLocalPatternLog(log);
-  } else {
-    saveLocalEventLog(log);
+  if ("type" in log && log.type === "participantSession") {
+    saveLocalParticipantLog(log);
+    return;
   }
+  if ("conditionIndex" in log) {
+    saveLocalPatternLog(log as PatternLog);
+    return;
+  }
+  saveLocalEventLog(log as EventLog);
 }

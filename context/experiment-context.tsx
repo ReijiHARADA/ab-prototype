@@ -17,7 +17,8 @@ import {
   SEQUENCE_PATTERN_ORDERS,
 } from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
-import { logPatternResult } from "@/lib/logger";
+import { buildParticipantSessionLog } from "@/lib/participantLog";
+import { logParticipantSession } from "@/lib/logger";
 import {
   getSocialProofSegments,
   getSocialProofText,
@@ -147,7 +148,12 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   const [sessionPatternLogs, setSessionPatternLogs] = useState<PatternLog[]>(
     []
   );
+  const sessionPatternLogsRef = useRef<PatternLog[]>([]);
   const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    sessionPatternLogsRef.current = sessionPatternLogs;
+  }, [sessionPatternLogs]);
 
   /* localStorage から実験の再開用に復元（クライアント専用） */
   useEffect(() => {
@@ -293,6 +299,11 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         : SEQUENCE_PATTERN_ORDERS[1];
     const next = conditionIndex + 1;
     if (next >= order.length) {
+      const row = buildParticipantSessionLog(
+        sessionPatternLogsRef.current,
+        experimentStartedAt
+      );
+      if (row) void logParticipantSession(row);
       setStep("completed");
       clearPersisted();
       return;
@@ -300,7 +311,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     bumpPatternClock();
     setConditionIndex(next);
     setStep("product");
-  }, [conditionIndex, sequencePattern, bumpPatternClock]);
+  }, [conditionIndex, sequencePattern, bumpPatternClock, experimentStartedAt]);
 
   const completePattern = useCallback(
     (args: {
@@ -345,7 +356,6 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
         args.action === "timeout"
       ) {
         setStep("surveyPrompt");
-        void logPatternResult(log);
         return;
       }
     },
