@@ -109,7 +109,7 @@ export function getParticipantSessionCsvHeadersEnglish(): string[] {
 }
 
 /**
- * スプレッドシート・CSV の 2 行目（`jp`＝日本語、`kr`＝韓国語の見出し）
+ * スプレッドシート・CSV の 2 行目（`jp`＝日本語、`ko`＝韓国語の見出し）
  */
 export function getParticipantSessionCsvHeaders(lang: Language): string[] {
   const L = lang === "ko" ? "ko" : "ja";
@@ -144,5 +144,6 @@ export function getParticipantSessionCsvHeaders(lang: Language): string[] {
 
 /** GAS やドキュメント用: シート名からヘッダ言語を決める */
 export function headerLangFromSheetTab(sheetTab: string): Language {
-  return sheetTab === "kr" ? "ko" : "ja";
+  if (sheetTab === "ko" || sheetTab === "kr") return "ko";
+  return "ja";
 }

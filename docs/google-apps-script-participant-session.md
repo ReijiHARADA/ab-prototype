@@ -6,7 +6,7 @@
 
 - **`type`**: 常に `"participantSession"`
 - **`language`**: UI 言語 `"ja"` | `"ko"`
-- **`sheetTab`**: **`"jp"`**（日本語を選んだ参加者）または **`"kr"`**（韓国語を選んだ参加者）— **スプレッドシート上のシート名（タブ名）と一致させる**
+- **`sheetTab`**: **`"jp"`**（日本語）または **`"ko"`**（韓国語）— **スプレッドシートのタブ名と一致**（GAS は `ko` が無いとき **`kr`** にフォールバック可）
 - **`rounds`**: 長さ 3 の配列。各要素が 1 回の商品詳細（条件）の結果
 
 ## スプレッドシートの準備
@@ -16,16 +16,16 @@
 | シート名（タブ名） | 用途 |
 |-------------------|------|
 | **`jp`** | 日本語 UI のログ |
-| **`kr`** | 韓国語 UI のログ |
+| **`ko`** | 韓国語 UI のログ（旧名 **`kr`** でも GAS がフォールバック） |
 
-※ 左から何番目かは不問。**タブ名が正確に `jp` と `kr`** であることが必要です。
+※ 左から何番目かは不問。**タブ名は `jp` と `ko`**（既存の **`kr`** のみのブックは GAS の `getSheetForParticipantLog` で吸収）。
 
 **行の意味（下の GAS 例どおり）**
 
 | 行 | 内容 |
 |----|------|
 | **1 行目** | **英語キー**（`serial`, `sessionId`, … — `lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeadersEnglish` と同じ順） |
-| **2 行目** | **`jp` シートは日本語、`kr` シートは韓国語**の見出し（`getParticipantSessionCsvHeaders` と同じ順・文言） |
+| **2 行目** | **`jp` シートは日本語、`ko` シートは韓国語**の見出し（`getParticipantSessionCsvHeaders` と同じ順・文言） |
 | **3 行目以降** | 参加者データ（**A 列は通し番号** `serial`、GAS が自動採番） |
 
 シートが空のときは、下記スクリプトが **1〜2 行目に英語ヘッダ→言語ヘッダ**を書き込みます。既に行がある場合はヘッダを追加しません（`getLastRow() === 0` のときのみ）。
@@ -74,8 +74,8 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 
 **ポイント**
 
-1. **記録先タブ**は **`body.language` を正**とする（`"ko"` → シート `kr`、それ以外 → `jp`）。`sheetTab` と食い違う場合は **`language` 優先**（Next.js の `/api/log` でも同様に上書き可）。  
-2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目＝英語キー**、**2 行目＝`jp` なら日本語 / `kr` なら韓国語**のヘッダを書く（`lib/participantSessionHeaders.ts` と一致）。  
+1. **記録先タブ**は **`body.language` を正**とする（`"ko"` → シート名 **`ko`**、それ以外 → **`jp`**）。`sheetTab` と食い違う場合は **`language` 優先**（Next.js の `/api/log` でも同様）。  
+2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目＝英語キー**、**2 行目＝`jp` なら日本語 / `ko` なら韓国語**のヘッダを書く（`lib/participantSessionHeaders.ts` と一致）。  
 3. `appendRow` で **データ行**を追加する。**A 列（`serial`）は** `getLastRow() - 2` から算出した **通し番号**。各条件の列は **常に `none` → `design_preference` → `body_type`** の順。
 
 ```javascript
@@ -135,10 +135,27 @@ var CANONICAL_CONDITION_ORDER = ["none", "design_preference", "body_type"];
 var HEADER_ROWS = 2;
 
 /**
- * 記録先シート名。body.language を正とする（"ko" → kr、それ以外 → jp）
+ * 記録先シート名。body.language を正とする（"ko" → "ko"、それ以外 → "jp"）
  */
 function getSheetTabName(body) {
-  return body.language === "ko" ? "kr" : "jp";
+  return body.language === "ko" ? "ko" : "jp";
+}
+
+/**
+ * タブ取得。韓国語は **`ko` を優先**し、無ければ旧名 **`kr`** を試す。
+ */
+function getSheetForParticipantLog(ss, tabName) {
+  var sh = ss.getSheetByName(tabName);
+  if (sh) return sh;
+  if (tabName === "ko") {
+    sh = ss.getSheetByName("kr");
+    if (sh) return sh;
+  }
+  if (tabName === "kr") {
+    sh = ss.getSheetByName("ko");
+    if (sh) return sh;
+  }
+  return null;
 }
 
 /**
@@ -181,11 +198,11 @@ function buildParticipantSessionHeadersEnglish() {
 }
 
 /**
- * 2 行目: tabName が "kr" なら韓国語、それ以外は日本語。
+ * 2 行目: tabName が "ko" または "kr" なら韓国語、それ以外は日本語。
  * lib/participantSessionHeaders.ts の getParticipantSessionCsvHeaders と文言を揃えること。
  */
 function buildParticipantSessionHeadersLocalized(tabName) {
-  var isKo = tabName === "kr";
+  var isKo = tabName === "ko" || tabName === "kr";
   var headers = [];
   headers.push(isKo ? "연번" : "通し番号");
   if (!isKo) {
@@ -285,14 +302,18 @@ function ensureParticipantSessionHeaderRows(sheet, tabName) {
 }
 
 /**
- * language に応じて jp / kr シートを選び、ヘッダ（初回のみ）＋データ 1 行を追加する
+ * language に応じて jp / ko シートを選び、ヘッダ（初回のみ）＋データ 1 行を追加する
  */
 function appendParticipantSession(body) {
   var tabName = getSheetTabName(body);
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(tabName);
+  var sheet = getSheetForParticipantLog(ss, tabName);
   if (!sheet) {
-    throw new Error("シートが見つかりません: " + tabName + "（タブ名を jp / kr にしてください）");
+    throw new Error(
+      "シートが見つかりません: " +
+        tabName +
+        "（`ko` または旧名 `kr` のいずれかを用意してください。jp も必要です）"
+    );
   }
 
   ensureParticipantSessionHeaderRows(sheet, tabName);
@@ -370,7 +391,7 @@ function jsonResponse(obj) {
 |------|------|
 | 1 | `e.postData.contents` を `JSON.parse` する |
 | 2 | `body.type === "participantSession"` なら記録処理へ |
-| 3 | **`body.language === "ko"`** ならシート **`kr`**、**`"ja"`** なら **`jp`**（`getSheetTabName`） |
+| 3 | **`body.language === "ko"`** ならシート **`ko`**（無ければ **`kr`**）、**`"ja"`** なら **`jp`**（`getSheetTabName` + `getSheetForParticipantLog`） |
 | 4 | `SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(tabName)` でシート取得 |
 | 5 | **`getLastRow() === 0` なら** 1 行目に英語キー、2 行目に言語別ヘッダを `appendRow` |
 | 6 | 通し番号 `serial` を付け、`buildParticipantRow(body, tabName)` の結果の **先頭に `serial` を結合**して **3 行目以降**にデータを追加 |
@@ -380,6 +401,6 @@ function jsonResponse(obj) {
 ## デプロイ後の確認
 
 1. Vercel の **`LOG_ENDPOINT`** に、この GAS の **ウェブアプリ URL**（`/exec` で終わるもの）を設定する。  
-2. アプリで実験を最後まで完了し、`jp` または `kr` を開いて行が増えているか確認する。
+2. アプリで実験を最後まで完了し、`jp` または `ko`（または旧 `kr`）を開いて行が増えているか確認する。
 
-**1 行目**は **`getParticipantSessionCsvHeadersEnglish`**、**2 行目**は **`getParticipantSessionCsvHeaders`**（`jp`/`kr` に対応）、データの並びは **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。
+**1 行目**は **`getParticipantSessionCsvHeadersEnglish`**、**2 行目**は **`getParticipantSessionCsvHeaders`**（`jp`/`ko` に対応）、データの並びは **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと見比べやすいです。

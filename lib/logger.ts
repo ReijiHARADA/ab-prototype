@@ -124,7 +124,7 @@ export async function logParticipantSession(
 ): Promise<void> {
   const payload: ParticipantSessionLog = {
     ...log,
-    /** `language` を正とし、`sheetTab` を常に同期（jp/kr 取り違え防止） */
+    /** `language` を正とし、`sheetTab` を常に同期（jp/ko 取り違え防止） */
     sheetTab: languageToSheetTab(log.language),
   };
   const ok = await postPayload(payload);

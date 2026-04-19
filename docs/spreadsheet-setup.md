@@ -10,15 +10,15 @@ flowchart LR
   D --> E[スプレッドシート appendRow]
 ```
 
-1. **Google スプレッドシート**を用意し、タブ **`jp`** と **`kr`** を作る。  
+1. **Google スプレッドシート**を用意し、タブ **`jp`** と **`ko`** を作る（旧ドキュメントどおり **`kr`** だけの場合は GAS が `ko` を探してから `kr` にフォールバックします）。  
 2. 同じブックの **Apps Script** に `doPost` を書き、**ウェブアプリとしてデプロイ**して URL を取得する。  
 3. **Vercel**（またはローカル）の環境変数 **`LOG_ENDPOINT`** にその URL を入れる。  
-4. 参加者が実験を**最後まで完了**すると、JSON が GAS に届き、**`sheetTab` に応じて `jp` または `kr` シート**に 1 行追加される。
+4. 参加者が実験を**最後まで完了**すると、JSON が GAS に届き、**`jp` または `ko` シート**に 1 行追加されます（`ko` が無いときは **`kr`** タブを使う GAS 例あり）。
 
-送信する JSON の形は **`types/experiment.ts` の `ParticipantSessionLog`**、GAS の `appendRow` の**値の列順**は **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと一致しやすいです。**1 行目の表示名**は **`jp` シート＝日本語、`kr` シート＝韓国語**（`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders` と GAS の `buildParticipantSessionHeadersForTab`）。
+送信する JSON の形は **`types/experiment.ts` の `ParticipantSessionLog`**、GAS の `appendRow` の**値の列順**は **`lib/csv.ts` の `participantSessionsToCsv`** と揃えると、CSV ダウンロードと一致しやすいです。**2 行目の表示名**は **`jp` シート＝日本語、`ko` シート＝韓国語**（`lib/participantSessionHeaders.ts` の `getParticipantSessionCsvHeaders`）。
 
-**シートの行の意味:** **1 行目＝英語キー**、**2 行目＝日本語（`jp`）または韓国語（`kr`）の見出し**、**3 行目以降＝参加者データ**（**A 列は通し番号**）。GAS の例（`ensureParticipantSessionHeaderRows`）は、シートが空のときだけ 1〜2 行目にヘッダを書きます。  
-**記録先タブ**は **`language` が `"ko"` なら `kr`、`"ja"` なら `jp`**（アプリの `/api/log` と `lib/logger.ts` でも同じルールに揃えます）。  
+**シートの行の意味:** **1 行目＝英語キー**、**2 行目＝日本語（`jp`）または韓国語（`ko`）の見出し**、**3 行目以降＝参加者データ**（**A 列は通し番号**）。GAS の例（`ensureParticipantSessionHeaderRows`）は、シートが空のときだけ 1〜2 行目にヘッダを書きます。  
+**記録先タブ**は **`language` が `"ko"` なら `ko`（旧 `kr` 可）、`"ja"` なら `jp`**（アプリの `/api/log` と `lib/logger.ts` でも同じ）。  
 **条件ごとの列ブロックの並び**は、表示パターンの訪問順ではなく **常に「何もなし（none）→ デザインの好み（design_preference）→ 体型（body_type）」** です（`lib/experiment.ts` の `CANONICAL_CONDITION_ORDER`）。
 
 **GAS のコピペ例（`doPost`・`sheetTab`・`appendRow`）**は **[google-apps-script-participant-session.md](./google-apps-script-participant-session.md)** を参照してください。
@@ -33,7 +33,7 @@ flowchart LR
 | タブ名 | 用途 |
 |--------|------|
 | **`jp`** | 日本語 UI を選んだ参加者のログ |
-| **`kr`** | 韓国語 UI を選んだ参加者のログ |
+| **`ko`** | 韓国語 UI を選んだ参加者のログ（**`kr`** タブのみのブックは GAS のフォールバックで可） |
 
 3. ブックの URL から **スプレッドシート ID** を控える（`/d/` と `/edit` の間の文字列）。GAS の `SPREADSHEET_ID` に使います。
 
@@ -85,7 +85,7 @@ LOG_ENDPOINT=https://script.google.com/macros/s/……/exec
 
 1. デプロイ済みの本番 URL、または `npm run dev` でアプリを開く。  
 2. 実験を **3 条件すべて完了**し、**完了画面**まで進める（このとき **`participantSession`** が 1 回送信される）。  
-3. スプレッドシートの **`jp`** または **`kr`** を開き、**新しい行**が追加されているか確認する。
+3. スプレッドシートの **`jp`** または **`ko`**（または **`kr`**）を開き、**新しい行**が追加されているか確認する。
 
 失敗時はブラウザの **開発者ツール → Network** で `/api/log` が **200** か確認する。**502/503** のときは `LOG_ENDPOINT` 未設定や GAS エラーの可能性があります。  
 アプリ内の「ログ確認」や、[`lib/logger.ts`](../lib/logger.ts) の localStorage 退避も参照できます。
@@ -98,7 +98,7 @@ LOG_ENDPOINT=https://script.google.com/macros/s/……/exec
 |------|----------------|
 | 行が増えない | Vercel の `LOG_ENDPOINT`、再デプロイ、`/api/log` が 200 か |
 | `/api/log` が 503 | サーバーに `LOG_ENDPOINT` が無い |
-| GAS でエラー | Apps Script の **実行ログ**（表示 → ログ）。`sheetTab` に応じた **`jp` / `kr` シートが存在するか** |
+| GAS でエラー | Apps Script の **実行ログ**（表示 → ログ）。**`jp` / `ko`（または `kr`）** のシートがあるか |
 | 列がずれる | データ行の **列の並び** と GAS の `buildParticipantRow` / [`participantSessionsToCsv`](../lib/csv.ts) の **値の順**を一致させる（ヘッダ行は言語付きで表示のみ） |
 
 ---

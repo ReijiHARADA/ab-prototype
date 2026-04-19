@@ -81,8 +81,8 @@ export function ResultDashboard() {
         <h1 className="text-lg font-medium">{m.resultTitle}</h1>
         <p className="text-xs text-neutral-600">
           {lang === "ja"
-            ? "CSV は1行目が英語キー、2行目が見出し（この画面の言語）、3行目以降がデータです。A列は通し番号。条件列は「なし→デザイン→体型」固定順。記録シートは言語（ja→jp / ko→kr）に合わせます。"
-            : "CSV는 1행 영어 키, 2행 헤더(UI 언어), 3행부터 데이터. A열 연번. 조건 열 순서 고정. 기록 시트는 언어(ja→jp, ko→kr)에 맞춥니다."}
+            ? "CSV は1行目が英語キー、2行目が見出し（この画面の言語）、3行目以降がデータです。A列は通し番号。条件列は「なし→デザイン→体型」固定順。記録シートは言語（ja→jp / ko→ko）に合わせます。"
+            : "CSV는 1행 영어 키, 2행 헤더(UI 언어), 3행부터 데이터. A열 연번. 조건 열 순서 고정. 기록 시트는 언어(ja→jp, ko→ko)에 맞춥니다."}
         </p>
         <Button
           type="button"

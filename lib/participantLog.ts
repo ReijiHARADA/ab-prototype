@@ -5,9 +5,9 @@ import type {
   SpreadsheetSheetTab,
 } from "@/types/experiment";
 
-/** 初回の言語選択に対応するスプレッドシートのタブ名（`jp` / `kr`） */
+/** 初回の言語選択に対応するスプレッドシートのタブ名（`jp` / `ko`） */
 export function languageToSheetTab(lang: Language): SpreadsheetSheetTab {
-  return lang === "ko" ? "kr" : "jp";
+  return lang === "ko" ? "ko" : "jp";
 }
 
 const EXPECTED_ROUNDS = 3;

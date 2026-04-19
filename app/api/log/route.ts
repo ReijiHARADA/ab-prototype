@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     (body as { type?: string }).type === "participantSession"
   ) {
     const p = body as { language?: string; sheetTab?: string };
-    p.sheetTab = p.language === "ko" ? "kr" : "jp";
+    p.sheetTab = p.language === "ko" ? "ko" : "jp";
   }
 
   try {
