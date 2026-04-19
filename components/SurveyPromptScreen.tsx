@@ -12,9 +12,15 @@ import { getMessages } from "@/lib/i18n";
 const SURVEY_CONFIRMED_ID = "survey-prompt-confirmed";
 
 export function SurveyPromptScreen() {
-  const { language, advanceFromSurveyPrompt } = useExperiment();
+  const {
+    language,
+    advanceFromSurveyPrompt,
+    conditionIndex,
+    totalConditions,
+  } = useExperiment();
   const m = getMessages(language ?? "ja");
   const [confirmed, setConfirmed] = useState(false);
+  const isLastSurvey = conditionIndex === totalConditions - 1;
 
   return (
     <div className="flex min-h-[55vh] flex-col justify-center gap-8 px-6 py-12">
@@ -25,9 +31,11 @@ export function SurveyPromptScreen() {
         >
           <ClipboardList className="size-7" />
         </div>
-        <h1 className="text-lg font-medium leading-snug">{m.surveyPromptTitle}</h1>
+        <h1 className="text-lg font-medium leading-snug">
+          {isLastSurvey ? m.surveyPromptLastTitle : m.surveyPromptTitle}
+        </h1>
         <p className="max-w-sm text-sm leading-relaxed text-neutral-600">
-          {m.surveyPromptBody}
+          {isLastSurvey ? m.surveyPromptLastBody : m.surveyPromptBody}
         </p>
       </div>
       <div className="flex items-start gap-3">
@@ -50,7 +58,7 @@ export function SurveyPromptScreen() {
         disabled={!confirmed}
         onClick={() => advanceFromSurveyPrompt()}
       >
-        {m.surveyPromptCta}
+        {isLastSurvey ? m.surveyPromptLastCta : m.surveyPromptCta}
       </Button>
     </div>
   );

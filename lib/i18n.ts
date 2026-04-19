@@ -34,6 +34,11 @@ const ja = {
     "続けるには、Google formのアンケートに回答してください。",
   surveyPromptCheckboxLabel: "Googleフォームに回答しました",
   surveyPromptCta: "次の画面へ",
+  /** 3条件目（最終パターン）直後の案内のみ */
+  surveyPromptLastTitle: "お疲れ様でした！",
+  surveyPromptLastBody:
+    "プロトタイプの操作はこれで終了です。Googleフォームのアンケートに回答してください。",
+  surveyPromptLastCta: "プロトタイプ操作を終了する。",
   productHeroCarouselAria: "商品画像（横にスワイプ）",
   productCarouselDotAria: (n: number, total: number) =>
     `画像 ${n} / ${total}`,
@@ -108,9 +113,9 @@ const ja = {
   color: "カラー",
   size: "サイズ",
   resultTitle: "ログ確認",
-  resultDownloadCsv: "CSVをダウンロード",
-  resultLocalTitle: "localStorageに保存されたログ",
-  resultSummaryTitle: "集計",
+  resultSpreadsheetOk: "スプレッドシートへの記録が完了しました。",
+  resultSpreadsheetNg:
+    "スプレッドシートへの記録に失敗しました。担当者に連絡するか、しばらくしてからお試しください。",
   resultColumns: {
     conditionId: "種別",
     index: "#",
@@ -123,10 +128,6 @@ const ja = {
     started: "開始",
     ended: "終了",
   },
-  summaryDwell: "各パターンの滞在時間（ms）",
-  summaryCart: "カート追加されたパターン",
-  summaryBack: "戻るが押されたパターン",
-  summaryTimeout: "タイムアウトしたパターン",
   /** ユニクロ商品ページに準拠: https://www.uniqlo.com/jp/ja/products/E465185-000/01 */
   productName: "エアリズムコットンオーバーサイズTシャツ/5分袖",
   productDesc:
@@ -167,6 +168,10 @@ const ko = {
     "계속하려면 Google Form 설문에 응답해 주세요.",
   surveyPromptCheckboxLabel: "Google 폼에 응답했습니다",
   surveyPromptCta: "다음 화면으로",
+  surveyPromptLastTitle: "수고하셨습니다!",
+  surveyPromptLastBody:
+    "프로토타입 조작은 여기까지입니다. Google 폼 설문에 응답해 주세요.",
+  surveyPromptLastCta: "프로토타입 조작을 종료합니다.",
   productHeroCarouselAria: "상품 이미지(가로로 스와이프)",
   productCarouselDotAria: (n: number, total: number) =>
     `이미지 ${n} / ${total}`,
@@ -240,9 +245,9 @@ const ko = {
   color: "컬러",
   size: "사이즈",
   resultTitle: "로그 확인",
-  resultDownloadCsv: "CSV 다운로드",
-  resultLocalTitle: "localStorage에 저장된 로그",
-  resultSummaryTitle: "요약",
+  resultSpreadsheetOk: "스프레드시트에 기록이 완료되었습니다.",
+  resultSpreadsheetNg:
+    "스프레드시트 기록에 실패했습니다. 담당자에게 문의하거나 잠시 후 다시 시도해 주세요.",
   resultColumns: {
     conditionId: "유형",
     index: "#",
@@ -255,10 +260,6 @@ const ko = {
     started: "시작",
     ended: "종료",
   },
-  summaryDwell: "패턴별 체류 시간(ms)",
-  summaryCart: "장바구니에 담긴 패턴",
-  summaryBack: "뒤로가기가 눌린 패턴",
-  summaryTimeout: "타임아웃한 패턴",
   /** 유니클로 상품 페이지 기준 (일본어판과 동등 내용) */
   productName: "에어리즘 코튼 오버사이즈 티셔츠/5부 소매",
   productDesc:

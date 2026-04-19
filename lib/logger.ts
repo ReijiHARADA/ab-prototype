@@ -93,10 +93,19 @@ function getEndpoint(): string | undefined {
   return "/api/log";
 }
 
-async function postPayload(body: unknown): Promise<boolean> {
+/** `/api/log` または GAS 直 POST の応答を解釈した結果 */
+export type LogPostResult = {
+  ok: boolean;
+  /** 失敗時の HTTP ステータスや API の error など（デバッグ用） */
+  message?: string;
+};
+
+async function postPayload(body: unknown): Promise<LogPostResult> {
   const endpoint = getEndpoint();
   /** ビルド時に未設定でも /api/log は常に存在 */
-  if (!endpoint) return false;
+  if (!endpoint) {
+    return { ok: false, message: "no_endpoint" };
+  }
   try {
     const res = await fetch(endpoint, {
       method: "POST",
@@ -104,16 +113,38 @@ async function postPayload(body: unknown): Promise<boolean> {
       body: JSON.stringify(body),
       mode: "cors",
     });
-    return res.ok;
-  } catch {
-    return false;
+    const text = await res.text();
+    let json: { ok?: boolean; error?: string } | null = null;
+    try {
+      json = JSON.parse(text) as { ok?: boolean; error?: string };
+    } catch {
+      json = null;
+    }
+    if (!res.ok) {
+      return {
+        ok: false,
+        message: json?.error ?? `http_${res.status}`,
+      };
+    }
+    if (json && typeof json === "object" && json.ok === false) {
+      return {
+        ok: false,
+        message: json.error ?? "upstream_rejected",
+      };
+    }
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      message: e instanceof Error ? e.message : "fetch_failed",
+    };
   }
 }
 
 /** PatternLog をサーバーへ送る（旧・デバッグ用。通常は {@link logParticipantSession} のみ） */
 export async function logPatternResult(log: PatternLog): Promise<void> {
-  const ok = await postPayload({ type: "pattern", ...log });
-  if (!ok) {
+  const r = await postPayload({ type: "pattern", ...log });
+  if (!r.ok) {
     saveLocalPatternLog(log);
   }
 }
@@ -121,22 +152,23 @@ export async function logPatternResult(log: PatternLog): Promise<void> {
 /** 1参加者1行（3条件まとめ）をサーバーへ送る。失敗時は localStorage に保存。 */
 export async function logParticipantSession(
   log: ParticipantSessionLog
-): Promise<void> {
+): Promise<LogPostResult> {
   const payload: ParticipantSessionLog = {
     ...log,
     /** `language` を正とし、`sheetTab` を常に同期（jp/ko 取り違え防止） */
     sheetTab: languageToSheetTab(log.language),
   };
-  const ok = await postPayload(payload);
-  if (!ok) {
+  const r = await postPayload(payload);
+  if (!r.ok) {
     saveLocalParticipantLog(payload);
   }
+  return r;
 }
 
 /** 補助イベントを記録。 */
 export async function logEvent(event: EventLog): Promise<void> {
-  const ok = await postPayload({ type: "event", ...event });
-  if (!ok) {
+  const r = await postPayload({ type: "event", ...event });
+  if (!r.ok) {
     saveLocalEventLog(event);
   }
 }

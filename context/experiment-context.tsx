@@ -18,7 +18,7 @@ import {
 } from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
 import { buildParticipantSessionLog } from "@/lib/participantLog";
-import { logParticipantSession } from "@/lib/logger";
+import { logParticipantSession, type LogPostResult } from "@/lib/logger";
 import {
   getSocialProofSegments,
   getSocialProofText,
@@ -122,6 +122,8 @@ interface ExperimentContextValue {
     interactionCounts: ProductInteractionCounts;
   }) => void;
   resetExperiment: () => void;
+  /** 最終送信（スプレッドシート）の成否。完了画面で表示 */
+  participantSessionSaveResult: LogPostResult | null;
 }
 
 const ExperimentContext = createContext<ExperimentContextValue | null>(null);
@@ -148,6 +150,8 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   );
   const sessionPatternLogsRef = useRef<PatternLog[]>([]);
   const hydratedRef = useRef(false);
+  const [participantSessionSaveResult, setParticipantSessionSaveResult] =
+    useState<LogPostResult | null>(null);
 
   useEffect(() => {
     sessionPatternLogsRef.current = sessionPatternLogs;
@@ -302,24 +306,29 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const advanceFromSurveyPrompt = useCallback(() => {
-    const order =
-      sequencePattern != null
-        ? SEQUENCE_PATTERN_ORDERS[sequencePattern]
-        : SEQUENCE_PATTERN_ORDERS[1];
-    const next = conditionIndex + 1;
-    if (next >= order.length) {
-      const row = buildParticipantSessionLog(
-        sessionPatternLogsRef.current,
-        experimentStartedAt
-      );
-      if (row) void logParticipantSession(row);
-      setStep("completed");
-      clearPersisted();
-      return;
-    }
-    bumpPatternClock();
-    setConditionIndex(next);
-    setStep("product");
+    void (async () => {
+      const order =
+        sequencePattern != null
+          ? SEQUENCE_PATTERN_ORDERS[sequencePattern]
+          : SEQUENCE_PATTERN_ORDERS[1];
+      const next = conditionIndex + 1;
+      if (next >= order.length) {
+        const row = buildParticipantSessionLog(
+          sessionPatternLogsRef.current,
+          experimentStartedAt
+        );
+        const result: LogPostResult = row
+          ? await logParticipantSession(row)
+          : { ok: false, message: "no_row" };
+        setParticipantSessionSaveResult(result);
+        setStep("completed");
+        clearPersisted();
+        return;
+      }
+      bumpPatternClock();
+      setConditionIndex(next);
+      setStep("product");
+    })();
   }, [conditionIndex, sequencePattern, bumpPatternClock, experimentStartedAt]);
 
   const completePattern = useCallback(
@@ -390,6 +399,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     setExperimentStartedAt(null);
     setPatternStartedAt(null);
     setSessionPatternLogs([]);
+    setParticipantSessionSaveResult(null);
   }, []);
 
   const value: ExperimentContextValue = {
@@ -415,6 +425,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     sessionPatternLogs,
     completePattern,
     resetExperiment,
+    participantSessionSaveResult,
   };
 
   return (
