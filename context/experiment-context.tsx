@@ -95,8 +95,10 @@ interface ExperimentContextValue {
   /** 言語選択後に選ぶ a/b/c の順序（1〜6） */
   sequencePattern: SequencePatternId | null;
   submitSequencePattern: (id: SequencePatternId) => void;
-  /** 現在のセッションで使う条件の並び（3件） */
+  /** 現在のセッションで使う条件の並び */
   conditionOrder: readonly ConditionId[];
+  /** この商品画面の制限時間（ms）。1回目・ソーシャルプルーフなしのみ1分 */
+  patternDurationMs: number;
   userInfo: UserInfo | null;
   setUserInfoDraft: (u: UserInfo) => void;
   submitUserInfo: (u: UserInfo) => void;
@@ -129,6 +131,8 @@ interface ExperimentContextValue {
 const ExperimentContext = createContext<ExperimentContextValue | null>(null);
 
 const PATTERN_MS = 120_000;
+/** 1回目・ソーシャルプルーフなし画面のみ 1 分 */
+const FIRST_NONE_PATTERN_MS = 60_000;
 
 export function ExperimentProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language | null>(null);
@@ -277,6 +281,13 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     [conditionOrder, conditionIndex]
   );
 
+  const patternDurationMs = useMemo(() => {
+    if (conditionIndex === 0 && currentConditionId === "none") {
+      return FIRST_NONE_PATTERN_MS;
+    }
+    return PATTERN_MS;
+  }, [conditionIndex, currentConditionId]);
+
   const socialProofCtx = useMemo(
     () =>
       language && userInfo
@@ -416,6 +427,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     goProductFromBodyType,
     conditionIndex,
     totalConditions: conditionOrder.length,
+    patternDurationMs,
     currentConditionId,
     socialProofText,
     socialProofSegments,
@@ -443,4 +455,4 @@ export function useExperiment() {
   return ctx;
 }
 
-export { PATTERN_MS };
+export { PATTERN_MS, FIRST_NONE_PATTERN_MS };

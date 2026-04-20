@@ -13,10 +13,7 @@ import { QuantitySelector } from "@/components/QuantitySelector";
 import { SectionAccordion } from "@/components/SectionAccordion";
 import { SocialProofMessage } from "@/components/SocialProofMessage";
 import { Button } from "@/components/ui/button";
-import {
-  PATTERN_MS,
-  useExperiment,
-} from "@/context/experiment-context";
+import { useExperiment } from "@/context/experiment-context";
 import { ADMIN_RESET_QUANTITY } from "@/lib/experiment";
 import {
   bumpAccordionInteraction,
@@ -34,6 +31,7 @@ export function ProductDetail() {
     resetExperiment,
     patternStartedAt,
     conditionIndex,
+    patternDurationMs,
   } = useExperiment();
 
   const completePatternRef = useRef(completePattern);
@@ -52,28 +50,60 @@ export function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [cartConfirmOpen, setCartConfirmOpen] = useState(false);
+  const [firstNoneInterstitialOpen, setFirstNoneInterstitialOpen] =
+    useState(false);
+  const interstitialCloseTimerRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const interactionCountsRef = useRef(createEmptyInteractionCounts());
+
+  const isFirstNoneScreen =
+    conditionIndex === 0 && currentConditionId === "none";
+
+  const elapsedMs = useCallback(() => {
+    if (!patternStartedAt) return 0;
+    return Math.max(0, Date.now() - new Date(patternStartedAt).getTime());
+  }, [patternStartedAt]);
+
+  const showFirstNoneEarlyInterstitial = useCallback(() => {
+    setCartConfirmOpen(false);
+    setFirstNoneInterstitialOpen(true);
+    if (interstitialCloseTimerRef.current) {
+      clearTimeout(interstitialCloseTimerRef.current);
+    }
+    interstitialCloseTimerRef.current = setTimeout(() => {
+      setFirstNoneInterstitialOpen(false);
+      interstitialCloseTimerRef.current = null;
+    }, 2000);
+  }, []);
 
   useEffect(() => {
     setIsFavorite(false);
     setCartConfirmOpen(false);
+    setFirstNoneInterstitialOpen(false);
+    if (interstitialCloseTimerRef.current) {
+      clearTimeout(interstitialCloseTimerRef.current);
+      interstitialCloseTimerRef.current = null;
+    }
     interactionCountsRef.current = createEmptyInteractionCounts();
   }, [conditionIndex]);
 
   useEffect(() => {
-    if (!cartConfirmOpen) return;
+    if (!cartConfirmOpen && !firstNoneInterstitialOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCartConfirmOpen(false);
+      if (e.key === "Escape") {
+        if (cartConfirmOpen) setCartConfirmOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [cartConfirmOpen]);
+  }, [cartConfirmOpen, firstNoneInterstitialOpen]);
 
   const selectionsRef = useRef({
     size: "M" as string,
@@ -112,17 +142,59 @@ export function ProductDetail() {
     });
   }, []);
 
+  const handleBack = useCallback(() => {
+    if (finishedRef.current) return;
+    if (
+      isFirstNoneScreen &&
+      elapsedMs() < patternDurationMs
+    ) {
+      showFirstNoneEarlyInterstitial();
+      return;
+    }
+    runFinish("back");
+  }, [
+    isFirstNoneScreen,
+    elapsedMs,
+    patternDurationMs,
+    showFirstNoneEarlyInterstitial,
+    runFinish,
+  ]);
+
+  const confirmAddToCart = useCallback(() => {
+    if (finishedRef.current) return;
+    setCartConfirmOpen(false);
+    if (selectionsRef.current.quantity === ADMIN_RESET_QUANTITY) {
+      finishedRef.current = true;
+      resetExperimentRef.current();
+      return;
+    }
+    if (
+      isFirstNoneScreen &&
+      elapsedMs() < patternDurationMs
+    ) {
+      showFirstNoneEarlyInterstitial();
+      return;
+    }
+    runFinish("add_to_cart");
+  }, [
+    isFirstNoneScreen,
+    elapsedMs,
+    patternDurationMs,
+    showFirstNoneEarlyInterstitial,
+    runFinish,
+  ]);
+
   useEffect(() => {
     finishedRef.current = false;
     if (!patternStartedAt) return;
     const started = new Date(patternStartedAt).getTime();
     const elapsed = Date.now() - started;
-    const remaining = Math.max(0, PATTERN_MS - elapsed);
+    const remaining = Math.max(0, patternDurationMs - elapsed);
     const id = setTimeout(() => {
       void runFinish("timeout");
     }, remaining);
     return () => clearTimeout(id);
-  }, [patternStartedAt, conditionIndex, runFinish]);
+  }, [patternStartedAt, conditionIndex, patternDurationMs, runFinish]);
 
   const showProof = currentConditionId !== "none";
 
@@ -140,7 +212,7 @@ export function ProductDetail() {
           type="button"
           className="rounded p-2"
           aria-label="back"
-          onClick={() => runFinish("back")}
+          onClick={handleBack}
         >
           <ArrowLeft className="size-5" />
         </button>
@@ -261,15 +333,25 @@ export function ProductDetail() {
               <Button
                 type="button"
                 className="h-12 min-h-12 flex-1 rounded-xl text-base"
-                onClick={() => {
-                  setCartConfirmOpen(false);
-                  runFinish("add_to_cart");
-                }}
+                onClick={() => void confirmAddToCart()}
               >
                 {m.addToCartConfirmSubmit}
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {firstNoneInterstitialOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+        >
+          <p className="max-w-md text-center text-sm leading-relaxed text-white">
+            {m.firstNoneEarlyActionMessage}
+          </p>
         </div>
       )}
     </div>
