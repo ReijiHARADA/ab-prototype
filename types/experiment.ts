@@ -57,7 +57,7 @@ export type ConditionId =
   | "design_preference"
   | "body_type";
 
-/** 商品詳細3回分の条件順（a/b/c の並び替え） */
+/** 商品詳細4回分の条件順（先頭は常になし＋a/b/c の並び替え6通り） */
 export type SequencePatternId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type PatternAction = "add_to_cart" | "back" | "timeout";
@@ -82,7 +82,7 @@ export interface ExperimentSession {
   startedAt: string;
 }
 
-/** スプレッドシート・集計用: 1参加者 = 1行（3条件分を rounds に内包） */
+/** スプレッドシート・集計用: 1参加者 = 1行（4回分を rounds に内包） */
 export interface ParticipantSessionLog {
   type: "participantSession";
   sessionId: string;

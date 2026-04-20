@@ -22,19 +22,19 @@ export const CANONICAL_CONDITION_ORDER: readonly ConditionId[] = [
 
 /**
  * パターン定義（言語選択後にユーザーが選ぶ）
- * - 1回目は必ず「なし（none）」
- * - 2・3回目は「販売量・デザイン・体型」のうち2種を順序付きで割り当て（6通り）
+ * - 先頭は必ず「なし（none）」のあと、a・b・c（販売量・デザイン・体型）の順を6通り
+ * - パターン1=abc … パターン6=cba（スプシ列順は CANONICAL_CONDITION_ORDER のまま）
  */
 export const SEQUENCE_PATTERN_ORDERS: Record<
   SequencePatternId,
   readonly ConditionId[]
 > = {
-  1: [N, S, D],
-  2: [N, S, B],
-  3: [N, D, S],
-  4: [N, D, B],
-  5: [N, B, S],
-  6: [N, B, D],
+  1: [N, S, D, B],
+  2: [N, S, B, D],
+  3: [N, D, S, B],
+  4: [N, D, B, S],
+  5: [N, B, S, D],
+  6: [N, B, D, S],
 };
 
 export function getConditionIdAtIndexInOrder(

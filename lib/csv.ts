@@ -67,7 +67,7 @@ export {
   PARTICIPANT_SESSION_COLUMN_KEYS,
 };
 
-/** 1参加者1行（3条件分を横に展開）。1行目=英語キー、2行目=言語別見出し、3行目以降=データ。`headerLanguage` 未指定時は先頭の `logs[].language`。 */
+/** 1参加者1行（4回分を横に展開）。1行目=英語キー、2行目=言語別見出し、3行目以降=データ。`headerLanguage` 未指定時は先頭の `logs[].language`。 */
 export function participantSessionsToCsv(
   logs: ParticipantSessionLog[],
   headerLanguage?: Language

@@ -10,7 +10,7 @@ export function languageToSheetTab(lang: Language): SpreadsheetSheetTab {
   return lang === "ko" ? "ko" : "jp";
 }
 
-const EXPECTED_ROUNDS = 3;
+const EXPECTED_ROUNDS = 4;
 
 /** 旧ログ（`userInfo.designTags` 配列）と新ログ（単一 `designTag`）の両方に対応 */
 function designPreferenceJoined(

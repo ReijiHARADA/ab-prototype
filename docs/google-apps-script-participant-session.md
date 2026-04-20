@@ -1,13 +1,13 @@
 # 1参加者1行（`participantSession`）のスプレッドシート連携
 
-アプリは **3条件すべて完了したとき** に、次の形の JSON を **`/api/log` 経由で GAS に POST** します。
+アプリは **4回分（4条件）すべて完了したとき** に、次の形の JSON を **`/api/log` 経由で GAS に POST** します。
 
 ## ペイロードの要点
 
 - **`type`**: 常に `"participantSession"`
 - **`language`**: UI 言語 `"ja"` | `"ko"`
 - **`sheetTab`**: **`"jp"`**（日本語）または **`"ko"`**（韓国語）— **スプレッドシートのタブ名と一致**（GAS は `ko` が無いとき **`kr`** にフォールバック可）
-- **`rounds`**: 長さ 3 の配列。各要素が 1 回の商品詳細（条件）の結果
+- **`rounds`**: 長さ 4 の配列。各要素が 1 回の商品詳細（条件）の結果
 
 ## スプレッドシートの準備
 
@@ -34,7 +34,7 @@
 
 ## GAS に届くデータ（POST の中身）
 
-Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に転送します。`e.postData.contents` を `JSON.parse` すると、おおよそ次のオブジェクトになります（`rounds` は 3 要素）。
+Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に転送します。`e.postData.contents` を `JSON.parse` すると、おおよそ次のオブジェクトになります（`rounds` は 4 要素）。
 
 ```json
 {

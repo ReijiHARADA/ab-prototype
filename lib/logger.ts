@@ -149,7 +149,7 @@ export async function logPatternResult(log: PatternLog): Promise<void> {
   }
 }
 
-/** 1参加者1行（3条件まとめ）をサーバーへ送る。失敗時は localStorage に保存。 */
+/** 1参加者1行（4条件分まとめ）をサーバーへ送る。失敗時は localStorage に保存。 */
 export async function logParticipantSession(
   log: ParticipantSessionLog
 ): Promise<LogPostResult> {
