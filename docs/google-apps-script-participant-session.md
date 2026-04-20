@@ -76,7 +76,7 @@ Next.js の `/api/log` が、そのまま JSON 文字列を GAS の `doPost` に
 
 1. **記録先タブ**は **`body.language` を正**とする（`"ko"` → シート名 **`ko`**、それ以外 → **`jp`**）。`sheetTab` と食い違う場合は **`language` 優先**（Next.js の `/api/log` でも同様）。  
 2. シートが **完全に空**（`getLastRow() === 0`）なら、**1 行目＝英語キー**、**2 行目＝`jp` なら日本語 / `ko` なら韓国語**のヘッダを書く（`lib/participantSessionHeaders.ts` と一致）。  
-3. `appendRow` で **データ行**を追加する。**A 列（`serial`）は** `getLastRow() - 2` から算出した **通し番号**。各条件の列は **常に `none` → `design_preference` → `body_type`** の順。
+3. `appendRow` で **データ行**を追加する。**A 列（`serial`）は** `getLastRow() - 2` から算出した **通し番号**。各条件の列は **常に `none` → `sales_volume` → `design_preference` → `body_type`** の順。
 
 ```javascript
 /**
@@ -129,7 +129,12 @@ var INTERACTION_KEYS = [
 /**
  * データ列の条件ブロック順（lib/experiment.ts の CANONICAL_CONDITION_ORDER と同じ）
  */
-var CANONICAL_CONDITION_ORDER = ["none", "design_preference", "body_type"];
+var CANONICAL_CONDITION_ORDER = [
+  "none",
+  "sales_volume",
+  "design_preference",
+  "body_type",
+];
 
 /** ヘッダ行数（1 行目=英語、2 行目=言語別） */
 var HEADER_ROWS = 2;
@@ -233,8 +238,8 @@ function buildParticipantSessionHeadersLocalized(tabName) {
     );
   }
 
-  var blockJa = ["何もなし", "デザインの好み", "体型"];
-  var blockKo = ["없음", "디자인 선호", "체형"];
+  var blockJa = ["何もなし", "販売量", "デザインの好み", "体型"];
+  var blockKo = ["없음", "판매량", "디자인 선호", "체형"];
 
   var roundFieldJa = [
     "条件ID",
@@ -277,7 +282,7 @@ function buildParticipantSessionHeadersLocalized(tabName) {
     "장바구니 담기",
   ];
 
-  for (var b = 0; b < 3; b++) {
+  for (var b = 0; b < CANONICAL_CONDITION_ORDER.length; b++) {
     var prefix = isKo ? blockKo[b] : blockJa[b];
     var rf = isKo ? roundFieldKo : roundFieldJa;
     var ig = isKo ? interactionKo : interactionJa;

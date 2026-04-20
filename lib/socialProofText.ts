@@ -36,15 +36,29 @@ export function getSocialProofSegments(
   const L = labelForUser(m, user);
 
   switch (conditionId) {
+    case "sales_volume":
+      return language === "ja"
+        ? [
+            {
+              bold: true,
+              text: "過去１ヶ月でよく購入されている商品です",
+            },
+          ]
+        : [
+            {
+              bold: true,
+              text: "지난 한 달 동안 자주 구매되는 상품입니다",
+            },
+          ];
     case "design_preference":
       return language === "ja"
         ? [
             { bold: true, text: `${L.designPick}が好きな方` },
-            { text: `に人気のある商品です` },
+            { text: "によく購入されている商品です" },
           ]
         : [
             { bold: true, text: `${L.designPick} 스타일을 선호하는 분들` },
-            { text: `에게 인기 있는 상품입니다` },
+            { text: "에게 잘 구매되는 상품입니다" },
           ];
     case "body_type":
       return [

@@ -3,7 +3,7 @@ import type { ConditionId, Language } from "@/types/experiment";
 import { CANONICAL_CONDITION_ORDER } from "@/lib/experiment";
 import { INTERACTION_COUNT_KEYS } from "@/lib/productInteractions";
 
-/** データ列のキー（英語）。順序は CANONICAL_CONDITION_ORDER（なし→デザイン→体型） */
+/** データ列のキー（英語）。順序は CANONICAL_CONDITION_ORDER（なし→販売量→デザイン→体型） */
 export const ROUND_FIELD_KEYS = [
   "conditionId",
   "socialProofText",
@@ -99,6 +99,7 @@ const INTERACTION_LABELS: Record<
 const CONDITION_BLOCK_LABELS: Record<ConditionId, { ja: string; ko: string }> =
   {
     none: { ja: "何もなし", ko: "없음" },
+    sales_volume: { ja: "販売量", ko: "판매량" },
     design_preference: { ja: "デザインの好み", ko: "디자인 선호" },
     body_type: { ja: "体型", ko: "체형" },
   };

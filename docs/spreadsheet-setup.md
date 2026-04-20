@@ -19,7 +19,7 @@ flowchart LR
 
 **シートの行の意味:** **1 行目＝英語キー**、**2 行目＝日本語（`jp`）または韓国語（`ko`）の見出し**、**3 行目以降＝参加者データ**（**A 列は通し番号**）。GAS の例（`ensureParticipantSessionHeaderRows`）は、シートが空のときだけ 1〜2 行目にヘッダを書きます。  
 **記録先タブ**は **`language` が `"ko"` なら `ko`（旧 `kr` 可）、`"ja"` なら `jp`**（アプリの `/api/log` と `lib/logger.ts` でも同じ）。  
-**条件ごとの列ブロックの並び**は、表示パターンの訪問順ではなく **常に「何もなし（none）→ デザインの好み（design_preference）→ 体型（body_type）」** です（`lib/experiment.ts` の `CANONICAL_CONDITION_ORDER`）。
+**条件ごとの列ブロックの並び**は、表示パターンの訪問順ではなく **常に「何もなし（none）→ 販売量（sales_volume）→ デザインの好み（design_preference）→ 体型（body_type）」** です（`lib/experiment.ts` の `CANONICAL_CONDITION_ORDER`）。
 
 **GAS のコピペ例（`doPost`・`sheetTab`・`appendRow`）**は **[google-apps-script-participant-session.md](./google-apps-script-participant-session.md)** を参照してください。
 

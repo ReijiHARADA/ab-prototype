@@ -5,6 +5,7 @@ import type {
   Gender,
   Language,
   Region,
+  SequencePatternId,
 } from "@/types/experiment";
 
 const ja = {
@@ -13,10 +14,19 @@ const ja = {
   experimenterOnlyBadge: "実験者用",
   patternSelectTitle: "表示パターンを選択してください",
   patternSelectIntro:
-    "商品詳細は3回表示されます。a・b・c の順序が変わります。",
-  patternLegendA: "a：ソーシャルプルーフなし",
-  patternLegendB: "b：デザインの好みに基づく",
-  patternLegendC: "c：体型に基づく",
+    "商品詳細は3回表示されます。1回目は常にソーシャルプルーフなし。2・3回目は a・b・c のうち2種の順序がパターンによります。",
+  patternLegendA: "a：過去１ヶ月の販売量（よく購入されている商品です）",
+  patternLegendB: "b：デザインの好み（よく購入されている商品です）",
+  patternLegendC: "c：体型（よく購入されている商品です）",
+  /** パターン選択の右側ラベル（1回目＝なし固定） */
+  sequencePatternOrderLabel: {
+    1: "なし→販売→デザイン",
+    2: "なし→販売→体型",
+    3: "なし→デザイン→販売",
+    4: "なし→デザイン→体型",
+    5: "なし→体型→販売",
+    6: "なし→体型→デザイン",
+  } satisfies Record<SequencePatternId, string>,
   experimentStartCta: "実験開始",
   patternN: (n: number) => `パターン${n}`,
   languageJa: "日本語",
@@ -98,7 +108,7 @@ const ja = {
   bodyTypeYourTypeQuote: (label: string) => `「${label}」`,
   /** 体型ソーシャルプルーフの太字部分（例: スタンダード型の方）— label は BMI 区分に対応する bodyTypeLabels の値 */
   socialProofBodyTypeLead: (label: string) => `${label}型の方`,
-  socialProofBodyTypeTail: "によく選ばれている商品です",
+  socialProofBodyTypeTail: "によく購入されている商品です",
   viewProduct: "商品を見る",
   productInStock: "在庫あり",
   productPrice: "¥1,990",
@@ -149,10 +159,18 @@ const ko = {
   experimenterOnlyBadge: "실험자용",
   patternSelectTitle: "표시 패턴을 선택하세요",
   patternSelectIntro:
-    "상품 상세는 3번 표시됩니다. a·b·c 순서가 달라집니다.",
-  patternLegendA: "a: 소셜 프루프 없음",
-  patternLegendB: "b: 디자인 취향 기반",
-  patternLegendC: "c: 체형 기반",
+    "상품 상세는 3번 표시됩니다. 1번째는 항상 소셜 프루프 없음. 2·3번째는 a·b·c 중 2종의 순서가 패턴에 따라 달라집니다.",
+  patternLegendA: "a: 지난 한 달 판매량(잘 구매되는 상품입니다)",
+  patternLegendB: "b: 디자인 취향(잘 구매되는 상품입니다)",
+  patternLegendC: "c: 체형(잘 구매되는 상품입니다)",
+  sequencePatternOrderLabel: {
+    1: "없음→판매→디자인",
+    2: "없음→판매→체형",
+    3: "없음→디자인→판매",
+    4: "없음→디자인→체형",
+    5: "없음→체형→판매",
+    6: "없음→체형→디자인",
+  } satisfies Record<SequencePatternId, string>,
   experimentStartCta: "실험 시작",
   patternN: (n: number) => `패턴 ${n}`,
   languageJa: "日本語",
@@ -231,7 +249,7 @@ const ko = {
   bodyTypeYourTypeLead: "당신의 체형 타입",
   bodyTypeYourTypeQuote: (label: string) => `"${label}"`,
   socialProofBodyTypeLead: (label: string) => `${label}형의 분들`,
-  socialProofBodyTypeTail: "이 자주 선택하는 상품입니다",
+  socialProofBodyTypeTail: "에게 잘 구매되는 상품입니다",
   viewProduct: "상품 보기",
   productInStock: "재고 있음",
   productPrice: "₩19,900",

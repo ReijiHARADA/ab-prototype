@@ -1,51 +1,40 @@
 import type { ConditionId, SequencePatternId } from "@/types/experiment";
 
-/** a: ソーシャルプルーフなし */
-const A: ConditionId = "none";
-/** b: デザインの好み */
-const B: ConditionId = "design_preference";
-/** c: 体型 */
-const C: ConditionId = "body_type";
+/** 1回目の商品画面は常にソーシャルプルーフなし */
+const N: ConditionId = "none";
+/** 過去1ヶ月の販売量ベース */
+const S: ConditionId = "sales_volume";
+/** デザインの好み */
+const D: ConditionId = "design_preference";
+/** 体型 */
+const B: ConditionId = "body_type";
 
 /**
  * スプレッドシート・CSV の列ブロック順（表示順パターンに依らず常にこの順）
- * — 何もなし → デザインの好み → 体型
+ * — 何もなし → 販売量 → デザインの好み → 体型
  */
 export const CANONICAL_CONDITION_ORDER: readonly ConditionId[] = [
-  A,
+  N,
+  S,
+  D,
   B,
-  C,
 ] as const;
 
 /**
  * パターン定義（言語選択後にユーザーが選ぶ）
- * - パターン1: abc … なし → デザインの好み → 体型
- * - パターン2: acb … なし → 体型 → デザインの好み
- * - パターン3: bac …
- * - パターン4: bca …
- * - パターン5: cab …
- * - パターン6: cba …
+ * - 1回目は必ず「なし（none）」
+ * - 2・3回目は「販売量・デザイン・体型」のうち2種を順序付きで割り当て（6通り）
  */
 export const SEQUENCE_PATTERN_ORDERS: Record<
   SequencePatternId,
   readonly ConditionId[]
 > = {
-  1: [A, B, C],
-  2: [A, C, B],
-  3: [B, A, C],
-  4: [B, C, A],
-  5: [C, A, B],
-  6: [C, B, A],
-};
-
-/** UI 用の a/b/c 表記（矢印区切り） */
-export const SEQUENCE_PATTERN_ABC_LABEL: Record<SequencePatternId, string> = {
-  1: "a→b→c",
-  2: "a→c→b",
-  3: "b→a→c",
-  4: "b→c→a",
-  5: "c→a→b",
-  6: "c→b→a",
+  1: [N, S, D],
+  2: [N, S, B],
+  3: [N, D, S],
+  4: [N, D, B],
+  5: [N, B, S],
+  6: [N, B, D],
 };
 
 export function getConditionIdAtIndexInOrder(

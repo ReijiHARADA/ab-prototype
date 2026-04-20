@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useExperiment } from "@/context/experiment-context";
-import { SEQUENCE_PATTERN_ABC_LABEL } from "@/lib/experiment";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { SequencePatternId } from "@/types/experiment";
@@ -76,7 +75,7 @@ export function PatternSelectScreen() {
                     selected ? "text-white" : "text-neutral-600"
                   )}
                 >
-                  {SEQUENCE_PATTERN_ABC_LABEL[id]}
+                  {m.sequencePatternOrderLabel[id]}
                 </span>
               </button>
             );

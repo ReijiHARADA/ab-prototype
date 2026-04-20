@@ -51,7 +51,11 @@ export interface UserInfo {
   bodyType: BodyTypeKey;
 }
 
-export type ConditionId = "body_type" | "design_preference" | "none";
+export type ConditionId =
+  | "none"
+  | "sales_volume"
+  | "design_preference"
+  | "body_type";
 
 /** 商品詳細3回分の条件順（a/b/c の並び替え） */
 export type SequencePatternId = 1 | 2 | 3 | 4 | 5 | 6;
