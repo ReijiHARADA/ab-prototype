@@ -51,13 +51,29 @@ export function ProductDetail() {
 
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [cartConfirmOpen, setCartConfirmOpen] = useState(false);
 
   const interactionCountsRef = useRef(createEmptyInteractionCounts());
 
   useEffect(() => {
     setIsFavorite(false);
+    setCartConfirmOpen(false);
     interactionCountsRef.current = createEmptyInteractionCounts();
   }, [conditionIndex]);
+
+  useEffect(() => {
+    if (!cartConfirmOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCartConfirmOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [cartConfirmOpen]);
 
   const selectionsRef = useRef({
     size: "M" as string,
@@ -165,7 +181,7 @@ export function ProductDetail() {
           <Button
             type="button"
             className="h-12 w-full rounded-md text-base"
-            onClick={() => runFinish("add_to_cart")}
+            onClick={() => setCartConfirmOpen(true)}
           >
             {m.addToCart}
           </Button>
@@ -209,6 +225,53 @@ export function ProductDetail() {
           }
         />
       </div>
+
+      {cartConfirmOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center"
+          role="presentation"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            aria-label="close"
+            onClick={() => setCartConfirmOpen(false)}
+          />
+          <div
+            className="relative z-10 w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-lg"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-confirm-title"
+          >
+            <h2
+              id="cart-confirm-title"
+              className="text-center text-base font-semibold leading-snug text-neutral-900"
+            >
+              {m.addToCartConfirmTitle}
+            </h2>
+            <div className="mt-6 flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 min-h-12 flex-1 rounded-xl text-base"
+                onClick={() => setCartConfirmOpen(false)}
+              >
+                {m.addToCartConfirmBack}
+              </Button>
+              <Button
+                type="button"
+                className="h-12 min-h-12 flex-1 rounded-xl text-base"
+                onClick={() => {
+                  setCartConfirmOpen(false);
+                  runFinish("add_to_cart");
+                }}
+              >
+                {m.addToCartConfirmSubmit}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

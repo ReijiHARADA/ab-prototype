@@ -113,6 +113,9 @@ const ja = {
   productInStock: "在庫あり",
   productPrice: "¥1,990",
   addToCart: "カートに入れる",
+  addToCartConfirmTitle: "カートに追加しますか？",
+  addToCartConfirmBack: "戻る",
+  addToCartConfirmSubmit: "カートに追加する",
   addToFavorites: "お気に入りに追加",
   storeStock: "店舗在庫状況",
   storeStockPlaceholder:
@@ -254,6 +257,9 @@ const ko = {
   productInStock: "재고 있음",
   productPrice: "₩19,900",
   addToCart: "장바구니에 담기",
+  addToCartConfirmTitle: "장바구니에 담으시겠습니까?",
+  addToCartConfirmBack: "뒤로",
+  addToCartConfirmSubmit: "장바구니에 담기",
   addToFavorites: "찜하기",
   storeStock: "매장 재고",
   storeStockPlaceholder:
