@@ -52,9 +52,6 @@ export function ProductDetail() {
   const [cartConfirmOpen, setCartConfirmOpen] = useState(false);
   const [firstNoneInterstitialOpen, setFirstNoneInterstitialOpen] =
     useState(false);
-  const interstitialCloseTimerRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
 
   const interactionCountsRef = useRef(createEmptyInteractionCounts());
 
@@ -69,23 +66,12 @@ export function ProductDetail() {
   const showFirstNoneEarlyInterstitial = useCallback(() => {
     setCartConfirmOpen(false);
     setFirstNoneInterstitialOpen(true);
-    if (interstitialCloseTimerRef.current) {
-      clearTimeout(interstitialCloseTimerRef.current);
-    }
-    interstitialCloseTimerRef.current = setTimeout(() => {
-      setFirstNoneInterstitialOpen(false);
-      interstitialCloseTimerRef.current = null;
-    }, 2000);
   }, []);
 
   useEffect(() => {
     setIsFavorite(false);
     setCartConfirmOpen(false);
     setFirstNoneInterstitialOpen(false);
-    if (interstitialCloseTimerRef.current) {
-      clearTimeout(interstitialCloseTimerRef.current);
-      interstitialCloseTimerRef.current = null;
-    }
     interactionCountsRef.current = createEmptyInteractionCounts();
   }, [conditionIndex]);
 
@@ -300,7 +286,7 @@ export function ProductDetail() {
 
       {cartConfirmOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
           role="presentation"
         >
           <button
@@ -343,16 +329,25 @@ export function ProductDetail() {
       )}
 
       {firstNoneInterstitialOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-6"
+        <button
+          type="button"
+          className="fixed inset-0 z-[70] flex min-h-dvh flex-col items-center justify-center gap-6 bg-black/50 p-6"
           role="dialog"
           aria-modal="true"
+          aria-describedby="first-none-notice"
           aria-live="polite"
+          onClick={() => setFirstNoneInterstitialOpen(false)}
         >
-          <p className="max-w-md text-center text-sm leading-relaxed text-white">
+          <p
+            id="first-none-notice"
+            className="pointer-events-none max-w-md text-center text-sm leading-relaxed text-white"
+          >
             {m.firstNoneEarlyActionMessage}
           </p>
-        </div>
+          <p className="pointer-events-none text-center text-xs font-medium text-white/85">
+            {m.firstNoneEarlyActionTapHint}
+          </p>
+        </button>
       )}
     </div>
   );

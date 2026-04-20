@@ -118,7 +118,8 @@ const ja = {
   addToCartConfirmSubmit: "カートに追加する",
   /** 1回目・ソーシャルプルーフなしで、1分未満に戻る／カート確定したときの全画面メッセージ */
   firstNoneEarlyActionMessage:
-    "この画面は1分間の制限があります。1分が経過するまで、戻る・カートに追加では次の画面には進めません。操作すると約2秒後に同じ商品画面に戻ります。1分経過後は通常どおり次へ進めます。",
+    "この画面は1分間の制限があります。1分が経過するまで、戻る・カートに追加では次の画面には進めません。1分経過後は通常どおり次へ進めます。",
+  firstNoneEarlyActionTapHint: "画面をタップして商品画面に戻る",
   addToFavorites: "お気に入りに追加",
   storeStock: "店舗在庫状況",
   storeStockPlaceholder:
@@ -264,7 +265,8 @@ const ko = {
   addToCartConfirmBack: "뒤로",
   addToCartConfirmSubmit: "장바구니에 담기",
   firstNoneEarlyActionMessage:
-    "이 화면은 1분간 제한이 있습니다. 1분이 지나기 전에는 뒤로가기·장바구니 담기로 다음 화면으로 갈 수 없습니다. 조작하면 약 2초 후 같은 상품 화면으로 돌아갑니다. 1분이 지난 뒤에는 평소처럼 진행됩니다.",
+    "이 화면은 1분간 제한이 있습니다. 1분이 지나기 전에는 뒤로가기·장바구니 담기로 다음 화면으로 갈 수 없습니다. 1분이 지난 뒤에는 평소처럼 진행됩니다.",
+  firstNoneEarlyActionTapHint: "화면을 탭하면 상품 화면으로 돌아갑니다",
   addToFavorites: "찜하기",
   storeStock: "매장 재고",
   storeStockPlaceholder:
