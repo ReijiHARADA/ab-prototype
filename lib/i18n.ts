@@ -236,7 +236,7 @@ const ko = {
   } as Record<Region, string>,
   designTags: {
     simple: "심플",
-    mode: "모드",
+    mode: "모던",
     classic: "클래식",
     casual: "캐주얼",
     street: "스트리트",
